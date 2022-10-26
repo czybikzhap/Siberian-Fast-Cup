@@ -1,0 +1,15 @@
+{
+    "require": {
+        "monolog/monolog": "^3.2",
+        "doctrine/orm": "2.13.*",
+        "symfony/yaml": "2.*",
+        "slim/slim": "4.*",
+        "slim/psr7": "^1.5",
+        "slim/php-view": "^3.2",
+        "uma/dic": "^3.0",
+        "ext-pdo": "*"
+    },
+    "autoload": {
+    	"App\\": "src/"
+    }
+}
