@@ -26,6 +26,7 @@ $container->set(UserController::class, function (ContainerInterface $container) 
     $connection = $entityManager->getConnection();
     return new UserController($userRepository, $userRepository, $connection);
 });
+$user = new UserController();
 
 AppFactory::setContainer($container);
 $app = AppFactory::create();
