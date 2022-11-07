@@ -12,24 +12,32 @@ use Doctrine\ORM\Mapping\Table;
 class User{
     #[Id, Column(type: 'integer'), GeneratedValue(strategy: 'AUTO')]
     protected int $id;
-    #[Column(type: 'string', unique: true, nullable: false)]
+    #[Column(type: 'string', nullable: false)]
     protected string $lastname;
-    #[Column(type: 'string', unique: true, nullable: false)]
-    protected string $firstname;
-    #[Column(type: 'string', unique: true, nullable: false)]
-    protected string $secondname;
+    #[Column(type: 'string', nullable: false)]
+    protected ?string  $firstname;
+    #[Column(type: 'string', nullable: false)]
+    protected ?string $secondname;
     #[Column(type: 'string', unique: true, nullable: false)]
     protected string $email;
-    #[Column(type: 'string', unique: true, nullable: false)]
+    #[Column(type: 'string', nullable: false)]
     protected string $password;
     #[Column(type: 'string', unique: true, nullable: false)]
-    protected string $phone;
-    #[Column(type: 'integer', unique: true, nullable: false)]
-    protected int $age;
+    protected ?string $phone;
+    #[Column(type: 'integer', nullable: false)]
+    protected ?int $age;
+    #[Column(type: 'string', unique: true, nullable: false)]
+    protected ?string $token;
 
-    public function __construct(string $lastname, string $firstname,
-                                string $secondname, string $email,
-                                string $password, string $phone, int $age)
+    public function __construct(
+        string $lastname,
+        string $email,
+        string $password,
+        string $firstname = null,
+        string $secondname = null,
+        string $phone = null,
+        int $age = null,
+        string $token = null)
     {
         $this->lastname = $lastname;
         $this->firstname = $firstname;
@@ -38,6 +46,7 @@ class User{
         $this->password = $password;
         $this->phone = $phone;
         $this->age = $age;
+        $this->token = $token;
     }
 
     public function setLastName(string $lastname)
@@ -73,6 +82,16 @@ class User{
         $this->age = $age;
     }
 
+    public function setToken(string $token)
+    {
+        $this->token = $token;
+    }
+
+    public  function getId(): int
+    {
+        return $this->id;
+    }
+
     public function getLastName(): string
     {
         return $this->lastname;
@@ -105,4 +124,23 @@ class User{
     {
         return $this->age;
     }
+
+    public function getToken(): ?string
+    {
+       return $this->token;
+    }
+
+//    public function toArray(): array
+//    {
+//        return [
+//            'id' => $this->getId(),
+//            'lastsname'=>$this->getLastName(),
+//            'firstsname'=>$this->getFirstName(),
+//            'secondname'=>$this->getSecondName(),
+//            'email'=>$this->getEmail(),
+//            'password'=>$this->getPassword(),
+//            'phone'=>$this->getPhone(),
+//            'age'=>$this->getAge()
+//        ];
+//    }
 }

@@ -9,11 +9,7 @@ return function (App $app) {
     //Регистрация пользователей
     $app->post('/signup', [UserController::class, "signUp"]);
 
-    $app->get('/sign/{name}', function (Request $request, Response $response, $args) {
-        $name = $args['name'];
-        $response->getBody()->write('Hello ' . $name . '!');
-        return $response;
-    });
+    $app->post('/signin', [UserController::class, "signIn"]);
 
 //    $app->group('/users', function (Group $group) {
 //        $group->get('', ListUsersAction::class);
