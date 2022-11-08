@@ -13,7 +13,14 @@ return function (App $app) {
     $app->post('/signin', [UserController::class, "signIn"]);
 
     //Получение данных о пользователе
-    $app->get('/user/info', [UserController::class, "getUserInfo"]);
+    $app->get('/user/info', [UserController::class, "getInfo"]);
+
+    //Редактирование данных о пользователе
+    $app->get('/user/edit', [UserController::class, "editIInfo"]);
+
+    //Удалить пользователе
+    $app->delete('/user/delete', [UserController::class, "delete"]);
+
 
 //    $app->group('/users', function (Group $group) {
 //        $group->get('', ListUsersAction::class);
