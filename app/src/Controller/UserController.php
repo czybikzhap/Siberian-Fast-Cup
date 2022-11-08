@@ -24,7 +24,7 @@ class UserController
         $params = json_decode($request->getBody()->getContents(), true);
         $errors = $this->validateSignUp($params);
 
-        if (empty($errors)) {
+        if (!empty($errors)) {
             $newStr = json_encode($errors);
             $response->getBody()->write($newStr);
             return $response
@@ -48,13 +48,17 @@ class UserController
             $messages['lastname']  = $lastnameError;
         }
 
-        $emailError = $this->validateEmail($params['email']);
+        $emailError = $this->validateEmail($params);
         if(empty($lastnameError))
         {
             $messages['email']  = $emailError;
         }
 
-        $messages['password']  = $this->validatePassword($params['password']);
+        $emailPassword = $this->validateEmail($params);
+        if(empty($emailPassword))
+        {
+            $messages['password']  = $emailPassword;
+        }
 
         return $messages;
     }
@@ -70,28 +74,27 @@ class UserController
         return $messages;
     }
 
-    private function validatePassword(string $password): ?string
+    private function validatePassword(array $params): ?string
     {
-        if(empty($password)){
+        $messages = null;
+        if(empty($params['password'])){
             $messages = 'Password not be empty';
-        }else
-        {
-            return null;
         }
+
         return $messages;
     }
 
-    private function validateEmail(string $email): ?string
+    private function validateEmail(array $params): ?string
     {
         $messages = null;
 
-        if(empty($email)) {
+        if(empty($params['email'])) {
             $messages = "Email not be empty or null!";
         } else {
-            if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+            if(!filter_var($params['email'], FILTER_VALIDATE_EMAIL)){
                 $messages = "The email address specified is not correct";
             }else {
-                $userFindEmail = $this->userRepository->findOneByEmail($email);
+                $userFindEmail = $this->userRepository->findOneByEmail($params['email']);
                 if ($userFindEmail instanceof User) {
                     $messages = "User with the same email already exists";
                 }
@@ -100,7 +103,6 @@ class UserController
         return $messages;
     }
 
-
     #Вход в систему, в свой аккаунт
     public function signIn (Request $request, Response $response)
     {
@@ -108,7 +110,7 @@ class UserController
 
         $errorsLogin = $this->validateSignIn($params);
 
-        if (empty($errorsLogin)) {
+        if (!empty($errorsLogin)) {
             $newStr = json_encode($errorsLogin);
             $response->getBody()->write($newStr);
             return $response
@@ -134,7 +136,7 @@ class UserController
 
                 return $response
                     ->withStatus(200)
-                    ->withHeader('XToken', $token);
+                    ->withHeader('Token', $token);
             }else {
                 $response->getBody()->write("Password entered incorrectly");
                 return $response
@@ -152,25 +154,45 @@ class UserController
     {
         $messages = [];
 
-        $messages['login']  = $this->validateLogin($params['login']);
+        $messages['login']  = $this->validateLogin($params);
 
-        $messages['password']  = $this->validatePassword($params['password']);
+        $messages['password']  = $this->validatePassword($params);
 
         return $messages;
     }
 
-    private function validateLogin(string $login): ?string
+    private function validateLogin(array $params): ?string
     {
         $messages = null;
 
-        if(empty($login)) {
+        if(empty($params['login'])) {
             $messages = "Login not be empty or null!";
         } else {
-            if(!filter_var($login, FILTER_VALIDATE_EMAIL)){
+            if(!filter_var($params['login'], FILTER_VALIDATE_EMAIL)){
                 $messages = "The email address specified is not correct";
             }
         }
         return $messages;
     }
 
+    public function getUserInfo(Request $request, Response $response)
+    {
+        $token = $request->getHeader( 'Token');
+        //var_dump($token);
+        $user = $this->userRepository->findOneByToken($token);
+        //var_dump($user);
+        if(!empty($user))
+        {
+            $userInfo = json_encode($user->info());
+            $response->getBody()->write(($userInfo));
+            return $response
+                ->withStatus(200);
+        }
+        else{
+            $response->getBody()->write("Token entered incorrectly");
+
+            return $response
+                ->withStatus(422);
+        }
+    }
 }

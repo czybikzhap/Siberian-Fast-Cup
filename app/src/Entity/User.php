@@ -39,14 +39,14 @@ class User{
         int $age = null,
         string $token = null)
     {
-        $this->lastname = $lastname;
-        $this->firstname = $firstname;
-        $this->secondname = $secondname;
-        $this->email = $email;
-        $this->password = $password;
-        $this->phone = $phone;
-        $this->age = $age;
-        $this->token = $token;
+        $this->lastname     = $lastname;
+        $this->firstname    = $firstname;
+        $this->secondname   = $secondname;
+        $this->email        = $email;
+        $this->password     = $password;
+        $this->phone        = $phone;
+        $this->age          = $age;
+        $this->token        = $token;
     }
 
     public function setLastName(string $lastname)
@@ -92,22 +92,22 @@ class User{
         return $this->id;
     }
 
-    public function getLastName(): string
+    public function getLastName(): ?string
     {
         return $this->lastname;
     }
 
-    public function getFirstName(): string
+    public function getFirstName(): ?string
     {
         return $this->firstname;
     }
 
-    public function getSecondName(): string
+    public function getSecondName(): ?string
     {
         return $this->secondname;
     }
 
-    public function getEmail(): string
+    public function getEmail(): ?string
     {
         return $this->email;
     }
@@ -116,11 +116,11 @@ class User{
     {
         return $this->password;
     }
-    public function getPhone(): string
+    public function getPhone(): ?string
     {
         return $this->phone;
     }
-    public function getAge(): int
+    public function getAge(): ?int
     {
         return $this->age;
     }
@@ -130,17 +130,15 @@ class User{
        return $this->token;
     }
 
-//    public function toArray(): array
-//    {
-//        return [
-//            'id' => $this->getId(),
-//            'lastsname'=>$this->getLastName(),
-//            'firstsname'=>$this->getFirstName(),
-//            'secondname'=>$this->getSecondName(),
-//            'email'=>$this->getEmail(),
-//            'password'=>$this->getPassword(),
-//            'phone'=>$this->getPhone(),
-//            'age'=>$this->getAge()
-//        ];
-//    }
+    public function info(): array
+    {
+        return [
+            'lastsname' => $this->getLastName(),
+            'firstsname'=> $this->getFirstName(),
+            'secondname'=> $this->getSecondName(),
+            'email'     => $this->getEmail(),
+            'phone'     => $this->getPhone(),
+            'age'       => $this->getAge()
+        ];
+    }
 }

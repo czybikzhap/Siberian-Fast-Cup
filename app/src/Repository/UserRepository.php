@@ -20,4 +20,8 @@ class UserRepository extends \Doctrine\ORM\EntityRepository
         return $this->findOneBy(['email' => $email]);
     }
 
+    public function findOneByToken(array $token): ?User
+    {
+        return $this->findOneBy(['token' => $token[0]]);
+    }
 }
