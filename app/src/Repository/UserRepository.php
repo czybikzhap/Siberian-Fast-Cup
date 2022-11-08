@@ -24,4 +24,13 @@ class UserRepository extends \Doctrine\ORM\EntityRepository
     {
         return $this->findOneBy(['token' => $token[0]]);
     }
+
+    public function delete(User $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
 }

@@ -195,4 +195,166 @@ class UserController
                 ->withStatus(422);
         }
     }
+
+    public function editIInfo(Request $request, Response $response)
+    {
+        $token = $request->getHeader( 'Token');
+        $user = $this->userRepository->findOneByToken($token);
+        $params = json_decode($request->getBody()->getContents(), true);
+
+        $errors = $this->validateAll($params);
+
+        if (!empty($errors)) {
+            $newStr = json_encode($errors);
+            $response->getBody()->write($newStr);
+            return $response
+                ->withStatus(422);
+        }
+
+        $lastname = $params['lastname'];
+        $firstname = $params['firstname'];
+        $secondname = $params['secondname'];
+        $email = $params['email'];
+        $phone = $params['phone'];
+        $age = $params['age'];
+        $password = $params['password'];
+
+        if(!empty($user))
+        {
+            if ($user->getLastName() !== $lastname) {
+                $user->setFirstName($lastname);
+            }
+            if ($user->getFirstName() !== $firstname) {
+                $user->setFirstName($firstname);
+            }
+            if ($user->getSecondName() !== $secondname) {
+                $user->setSecondName($secondname);
+            }
+            if ($user->getEmail() !== $email) {
+                $user->setEmail($email);
+            }
+            if ($user->getPhone() !== $phone) {
+                $user->setPhone($phone);
+            }
+
+            if ($user->getAge() !== $age) {
+                $user->setAge($age);
+            }
+            if ($user->getPassword() !== $password) {
+                $user->setPassword($password);
+            }
+
+            $this->userRepository->add($user, true);
+
+            return $response
+                ->withStatus(201);
+        }
+        else{
+            $response->getBody()->write("Token entered incorrectly");
+
+            return $response
+                ->withStatus(422);
+        }
+    }
+
+    private function validateAll(array $params): ?array
+    {
+        $messages = [];
+
+        $lastnameError = $this->validateLastname($params);
+        if(empty($lastnameError))
+        {
+            $messages['lastname']  = $lastnameError;
+        }
+
+        $firstnameError = $this->validateFirstname($params);
+        if(empty($firstnameError))
+        {
+            $messages['firstname']  = $firstnameError;
+        }
+
+        $secondnameError = $this->validateSecondname($params);
+        if(empty($secondnameError))
+        {
+            $messages['secondname']  = $secondnameError;
+        }
+
+        $emailError = $this->validateEmail($params);
+        if(empty($lastnameError))
+        {
+            $messages['email']  = $emailError;
+        }
+
+        $phoneError = $this->validatePhone($params);
+        if(empty($phoneError))
+        {
+            $messages['phone']  = $phoneError;
+        }
+
+        $ageError = $this->validateAge($params);
+        if(empty($ageError))
+        {
+            $messages['age']  = $ageError;
+        }
+
+        $emailPassword = $this->validateEmail($params);
+        if(empty($emailPassword))
+        {
+            $messages['password']  = $emailPassword;
+        }
+
+        return $messages;
+    }
+
+    private function validateFirstname(array $params): ?string
+    {
+        $messages = null;
+        if(empty($params['firstname'])){
+            $messages = 'Firstname not be empty';
+        }
+        return $messages;
+    }
+
+    private function validateSecondname(array $params): ?string
+    {
+        $messages = null;
+        if(empty($params['secondname'])){
+            $messages = 'Secondname not be empty';
+        }
+        return $messages;
+    }
+
+    private function validatePhone(array $params): ?string
+    {
+
+    }
+
+    private function validateAge(array $params): ?string
+    {
+        $messages = null;
+        if(empty($params['age'])){
+            $messages = 'Age not be empty';
+        }
+        return $messages;
+    }
+
+    public function delete(Request $request, Response $response)
+    {
+        $token = $request->getHeader( 'Token');
+        $user = $this->userRepository->findOneByToken($token);
+
+        if(!empty($user))
+        {
+            $this->userRepository->delete($user);
+
+            return $response
+                ->withStatus(200);
+        }
+        else{
+            $response->getBody()->write("Token entered incorrectly");
+
+            return $response
+                ->withStatus(422);
+        }
+    }
 }
