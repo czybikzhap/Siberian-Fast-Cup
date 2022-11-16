@@ -21,6 +21,18 @@ return function (App $app) {
     //Удалить пользователе
     $app->delete('/user/delete', [UserController::class, "delete"]);
 
+    //Выйти из профиля пользователя
+    $app->get('/user/signout', [UserController::class, "signOut"]);
+
+    //подписаться на друга
+    $app->post('/user/follower/add', [UserController::class, "addFollower"]);
+
+    //отписаться от друга
+    $app->post('/user/follower/delete', [UserController::class, "deleteFollower"]);
+
+    //список друзей
+    $app->post('/user/follower/show', [UserController::class, "showFollowers"]);
+
 
 //    $app->group('/users', function (Group $group) {
 //        $group->get('', ListUsersAction::class);

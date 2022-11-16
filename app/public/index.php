@@ -1,7 +1,9 @@
 <?php
 
 use App\Controller\UserController;
+use App\Entity\Follower;
 use App\Entity\User;
+use App\Repository\FollowerRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManager;
 use Psr\Container\ContainerInterface;
@@ -20,11 +22,13 @@ $container->set(UserController::class, function (ContainerInterface $container) 
     /** @var UserRepository $userRepository */
     $userRepository = $entityManager->getRepository(User::class);
 
+    /** @var FollowerRepository $followerRepository */
+    $followerRepository = $entityManager->getRepository(Follower::class);
 //    /** @var UserController $userIdentityRepository */
 //    $userIdentityRepository = $entityManager->getRepository(UserIdentity::class);
 
     $connection = $entityManager->getConnection();
-    return new UserController($userRepository, $userRepository, $connection);
+    return new UserController($userRepository, $followerRepository, $connection);
 });
 $user = new UserController();
 

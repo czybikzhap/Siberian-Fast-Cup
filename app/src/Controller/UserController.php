@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
 
+use App\Entity\Follower;
 use PDO;
 use Ramsey\Uuid\Uuid;
 use Slim\Psr7\Headers;
@@ -8,16 +9,20 @@ use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Repository\FollowerRepository;
 
 class UserController
 {
 
     private ?UserRepository $userRepository;
+    private ?FollowerRepository $followerRepository;
 
-    public function __construct(UserRepository $userRepository = null)
+    public function __construct(UserRepository $userRepository = null, FollowerRepository $followerRepository = null)
     {
         $this->userRepository = $userRepository;
+        $this->followerRepository = $followerRepository;
     }
+
     #Регистрация пользователя
     public function signUp (Request $request, Response $response)
     {
@@ -43,27 +48,25 @@ class UserController
         $messages = [];
 
         $lastnameError = $this->validateLastname($params);
-        if(empty($lastnameError))
+        if(!empty($lastnameError))
         {
             $messages['lastname']  = $lastnameError;
         }
 
         $emailError = $this->validateEmail($params);
-        if(empty($lastnameError))
+        if(!empty($lastnameError))
         {
             $messages['email']  = $emailError;
         }
 
-        $emailPassword = $this->validateEmail($params);
-        if(empty($emailPassword))
+        $passwordError = $this->validatePassword($params);
+        if(!empty($passwordError))
         {
-            $messages['password']  = $emailPassword;
+            $messages['password']  = $passwordError;
         }
 
         return $messages;
     }
-
-
 
     private function validateLastname(array $params): ?string
     {
@@ -154,9 +157,17 @@ class UserController
     {
         $messages = [];
 
-        $messages['login']  = $this->validateLogin($params);
+        $emailError = $this->validateLogin($params);
+        if(!empty($lastnameError))
+        {
+            $messages['login']  = $emailError;
+        }
 
-        $messages['password']  = $this->validatePassword($params);
+        $passwordError = $this->validatePassword($params);
+        if(!empty($passwordError))
+        {
+            $messages['password']  = $passwordError;
+        }
 
         return $messages;
     }
@@ -175,135 +186,177 @@ class UserController
         return $messages;
     }
 
-    public function getUserInfo(Request $request, Response $response)
+    public function getInfo(Request $request, Response $response)
     {
+        if(!$request->hasHeader('Token'))
+        {
+            $response->getBody()->write("Not authorized");
+
+            return $response
+                ->withStatus(401);
+        }
+
         $token = $request->getHeader( 'Token');
-        //var_dump($token);
+        $token = reset($token);
         $user = $this->userRepository->findOneByToken($token);
-        //var_dump($user);
+
         if(!empty($user))
         {
-            $userInfo = json_encode($user->info());
+            $userInfo = json_encode($user->toArray());
             $response->getBody()->write(($userInfo));
             return $response
                 ->withStatus(200);
         }
-        else{
-            $response->getBody()->write("Token entered incorrectly");
 
-            return $response
-                ->withStatus(422);
-        }
+        $response->getBody()->write("Token entered incorrectly");
+
+        return $response
+            ->withStatus(422);
+
     }
 
     public function editIInfo(Request $request, Response $response)
     {
-        $token = $request->getHeader( 'Token');
-        $user = $this->userRepository->findOneByToken($token);
-        $params = json_decode($request->getBody()->getContents(), true);
-
-        $errors = $this->validateAll($params);
-
-        if (!empty($errors)) {
-            $newStr = json_encode($errors);
-            $response->getBody()->write($newStr);
-            return $response
-                ->withStatus(422);
-        }
-
-        $lastname = $params['lastname'];
-        $firstname = $params['firstname'];
-        $secondname = $params['secondname'];
-        $email = $params['email'];
-        $phone = $params['phone'];
-        $age = $params['age'];
-        $password = $params['password'];
-
-        if(!empty($user))
+        if(!$request->hasHeader('Token'))
         {
-            if ($user->getLastName() !== $lastname) {
-                $user->setFirstName($lastname);
-            }
-            if ($user->getFirstName() !== $firstname) {
-                $user->setFirstName($firstname);
-            }
-            if ($user->getSecondName() !== $secondname) {
-                $user->setSecondName($secondname);
-            }
-            if ($user->getEmail() !== $email) {
-                $user->setEmail($email);
-            }
-            if ($user->getPhone() !== $phone) {
-                $user->setPhone($phone);
-            }
-
-            if ($user->getAge() !== $age) {
-                $user->setAge($age);
-            }
-            if ($user->getPassword() !== $password) {
-                $user->setPassword($password);
-            }
-
-            $this->userRepository->add($user, true);
+            $response->getBody()->write("Not authorized");
 
             return $response
-                ->withStatus(201);
+                ->withStatus(401);
         }
-        else{
+
+        $token = $request->getHeader( 'Token');
+        $token = reset($token);
+
+        $user = $this->userRepository->findOneByToken($token);
+        if($user === null)
+        {
             $response->getBody()->write("Token entered incorrectly");
 
             return $response
                 ->withStatus(422);
         }
-    }
 
-    private function validateAll(array $params): ?array
-    {
-        $messages = [];
-
-        $lastnameError = $this->validateLastname($params);
-        if(empty($lastnameError))
+        $params = json_decode($request->getBody()->getContents(), true);
+        if(empty($params))
         {
-            $messages['lastname']  = $lastnameError;
+            $response->getBody()->write("body empty");
+            return $response
+                ->withStatus(422);
         }
 
-        $firstnameError = $this->validateFirstname($params);
-        if(empty($firstnameError))
+        if (array_key_exists ('lastname', $params))
         {
-            $messages['firstname']  = $firstnameError;
+            $errors = $this->validateLastname($params);
+            if (!empty($errors)) {
+                $newStr = json_encode($errors);
+                $response->getBody()->write($newStr);
+                return $response
+                    ->withStatus(422);
+            }
+
+            if ($user->getLastName() !== $params['lastname']) {
+                $user->setLastName($params['lastname']);
+            }
         }
 
-        $secondnameError = $this->validateSecondname($params);
-        if(empty($secondnameError))
+        if (array_key_exists ('firstname', $params))
         {
-            $messages['secondname']  = $secondnameError;
+            $errors = $this->validateFirstname($params);
+            if (!empty($errors)) {
+                $newStr = json_encode($errors);
+                $response->getBody()->write($newStr);
+                return $response
+                    ->withStatus(422);
+            }
+
+            if ($user->getFirstName() !== $params['firstname']) {
+                $user->setFirstName($params['firstname']);
+            }
         }
 
-        $emailError = $this->validateEmail($params);
-        if(empty($lastnameError))
+        if (array_key_exists ('secondname', $params))
         {
-            $messages['email']  = $emailError;
+            $errors = $this->validateSecondname($params);
+            if (!empty($errors)) {
+                $newStr = json_encode($errors);
+                $response->getBody()->write($newStr);
+                return $response
+                    ->withStatus(422);
+            }
+
+            if ($user->getSecondName() !== $params['secondname']) {
+                $user->setSecondName($params['secondname']);
+            }
         }
 
-        $phoneError = $this->validatePhone($params);
-        if(empty($phoneError))
+        if (array_key_exists ('email', $params))
         {
-            $messages['phone']  = $phoneError;
+            $errors = $this->validateEmail($params);
+            if (!empty($errors)) {
+                $newStr = json_encode($errors);
+                $response->getBody()->write($newStr);
+                return $response
+                    ->withStatus(422);
+            }
+
+            if ($user->getEmail() !== $params['email']) {
+                $user->setEmail($params['email']);
+            }
+
         }
 
-        $ageError = $this->validateAge($params);
-        if(empty($ageError))
+        if (array_key_exists ('phone', $params))
         {
-            $messages['age']  = $ageError;
+            $errors = $this->validatePhone($params);
+            if (!empty($errors)) {
+                $newStr = json_encode($errors);
+                $response->getBody()->write($newStr);
+                return $response
+                    ->withStatus(422);
+            }
+
+            if ($user->getPhone() !== $params['phone']) {
+                $user->setPhone($params['phone']);
+            }
         }
 
-        $emailPassword = $this->validateEmail($params);
-        if(empty($emailPassword))
+        if (array_key_exists ('age', $params))
         {
-            $messages['password']  = $emailPassword;
+            $errors = $this->validateAge($params);
+            if (!empty($errors)) {
+                $newStr = json_encode($errors);
+                $response->getBody()->write($newStr);
+                return $response
+                    ->withStatus(422);
+            }
+
+            if ($user->getAge() !== $params['age']) {
+                $user->setAge($params['age']);
+            }
         }
 
-        return $messages;
+        if (array_key_exists ('password', $params))
+        {
+            $errors = $this->validatePassword($params);
+            if (!empty($errors)) {
+                $newStr = json_encode($errors);
+                $response->getBody()->write($newStr);
+                return $response
+                    ->withStatus(422);
+            }
+
+            if ($user->getPassword() !== $params['password']) {
+                $user->setPassword($params['password']);
+            }
+        }
+
+        $this->userRepository->add($user, true);
+
+        var_dump($user);
+        return $response
+            ->withStatus(201);
+
     }
 
     private function validateFirstname(array $params): ?string
@@ -326,7 +379,11 @@ class UserController
 
     private function validatePhone(array $params): ?string
     {
-
+        $messages = null;
+        if(empty($params['phone'])){
+            $messages = 'Phone not be empty';
+        }
+        return $messages;
     }
 
     private function validateAge(array $params): ?string
@@ -338,9 +395,19 @@ class UserController
         return $messages;
     }
 
+    //Delete user
     public function delete(Request $request, Response $response)
     {
+        if(!$request->hasHeader('Token'))
+        {
+            $response->getBody()->write("Not authorized");
+
+            return $response
+                ->withStatus(401);
+        }
+
         $token = $request->getHeader( 'Token');
+        $token = reset($token);
         $user = $this->userRepository->findOneByToken($token);
 
         if(!empty($user))
@@ -357,4 +424,125 @@ class UserController
                 ->withStatus(422);
         }
     }
+
+    public function signOut(Request $request, Response $response)
+    {
+        if(!$request->hasHeader('Token'))
+        {
+            $response->getBody()->write("Not authorized");
+
+            return $response
+                ->withStatus(401);
+        }
+
+        $token = $request->getHeader( 'Token');
+        $token = reset($token);
+        $user = $this->userRepository->findOneByToken($token);
+        if($user === null)
+        {
+            $response->getBody()->write("Token entered incorrectly");
+
+            return $response
+                ->withStatus(422);
+        }
+
+        $user->setToken(null);
+
+        $this->userRepository->add($user, true);
+
+        var_dump($user);
+        return $response
+            ->withStatus(201);
+    }
+
+    public function addFollower(Request $request, Response $response)
+    {
+        if(!$request->hasHeader('Token'))
+        {
+            $response->getBody()->write("Not authorized");
+
+            return $response
+                ->withStatus(401);
+        }
+
+        $token = $request->getHeader( 'Token');
+        $token = reset($token);
+
+        $user = $this->userRepository->findOneByToken($token);
+        if($user === null)
+        {
+            $response->getBody()->write("Token entered incorrectly");
+
+            return $response
+                ->withStatus(422);
+        }
+
+        $params = json_decode($request->getBody()->getContents(), true);
+        if (array_key_exists ('follower_id', $params))
+        {
+            if(empty($params['follower_id']))
+            {
+                $response->getBody()->write("follower_id not be empty or null");
+                return $response
+                    ->withStatus(422);
+            }
+        }else{
+            $response->getBody()->write("follower_id not use");
+            return $response
+                ->withStatus(400);
+        }
+
+        $follower = new Follower($user->getId(), $params['follower_id']);
+        var_dump($follower);
+        $this->followerRepository->add($follower, true);
+
+        $response->getBody()->write("Поздравляем друг добавлен!");
+        return $response
+            ->withStatus(201);
+    }
+
+    public function deleteFollower(Request $request, Response $response)
+    {
+        if(!$request->hasHeader('Token'))
+        {
+            $response->getBody()->write("Not authorized");
+
+            return $response
+                ->withStatus(401);
+        }
+
+        $token = $request->getHeader( 'Token');
+        $token = reset($token);
+        $user = $this->userRepository->findOneByToken($token);
+        if($user === null)
+        {
+            $response->getBody()->write("Token entered incorrectly");
+
+            return $response
+                ->withStatus(422);
+        }
+
+        $params = json_decode($request->getBody()->getContents(), true);
+        if (array_key_exists ('follower_id', $params))
+        {
+            if(empty($params['follower_id']))
+            {
+                $response->getBody()->write("id_follower not be empty or null");
+                return $response
+                    ->withStatus(400);
+            }
+        }else{
+            $response->getBody()->write("id_follower not use");
+            return $response
+                ->withStatus(400);
+        }
+
+        $follower = $this->followerRepository->findOneByFollower($user->getId(), $params['follower_id']);
+        $this->followerRepository->delete($follower, true);
+
+        $response->getBody()->write("Вы отписались от друга!");
+        return $response
+            ->withStatus(201);
+    }
+
 }
