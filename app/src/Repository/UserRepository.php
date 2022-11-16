@@ -20,9 +20,9 @@ class UserRepository extends \Doctrine\ORM\EntityRepository
         return $this->findOneBy(['email' => $email]);
     }
 
-    public function findOneByToken(array $token): ?User
+    public function findOneByToken(string $token): ?User
     {
-        return $this->findOneBy(['token' => $token[0]]);
+        return $this->findOneBy(['token' => $token]);
     }
 
     public function delete(User $entity, bool $flush = false): void

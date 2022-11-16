@@ -2,11 +2,14 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\Table;
+use Doctrine\Common\Collections\ArrayCollection;
 
 #[Entity(repositoryClass: UserRepository::class), Table(name: 'users')]
 class User{
@@ -28,6 +31,10 @@ class User{
     protected ?int $age;
     #[Column(type: 'string', unique: true, nullable: false)]
     protected ?string $token;
+    #[OneToMany( mappedBy: 'leftUser', targetEntity: Follower::class)]
+    private Collection $followers;
+    #[OneToMany( mappedBy: 'rightUser', targetEntity: Follower::class)]
+    private Collection $subscribers;
 
     public function __construct(
         string $lastname,
@@ -47,6 +54,8 @@ class User{
         $this->phone        = $phone;
         $this->age          = $age;
         $this->token        = $token;
+        $this->followers    = new ArrayCollection();
+        $this->subscribers    = new ArrayCollection();
     }
 
     public function setLastName(string $lastname)
@@ -130,15 +139,28 @@ class User{
        return $this->token;
     }
 
-    public function info(): array
+    public function getFollowers(): Collection
+    {
+        return $this->followers;
+    }
+    public function toArray(): array
     {
         return [
-            'lastsname' => $this->getLastName(),
-            'firstsname'=> $this->getFirstName(),
+            'lastname' => $this->getLastName(),
+            'firstname'=> $this->getFirstName(),
             'secondname'=> $this->getSecondName(),
             'email'     => $this->getEmail(),
             'phone'     => $this->getPhone(),
             'age'       => $this->getAge()
         ];
+    }
+
+    /**
+     * @return Collection
+     */
+
+    public function getSubscribers(): Collection
+    {
+        return $this->subscribers;
     }
 }
