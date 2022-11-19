@@ -24,15 +24,17 @@ return function (App $app) {
     //Выйти из профиля пользователя
     $app->get('/user/signout', [UserController::class, "signOut"]);
 
-    //подписаться на друга
-    $app->post('/user/follower/add', [UserController::class, "addFollower"]);
+    //подписаться на пользователя (добавить подписку на пользователя)
+    $app->post('/user/subscription/add', [UserController::class, "addSubscription"]);
 
-    //отписаться от друга
-    $app->post('/user/follower/delete', [UserController::class, "deleteFollower"]);
+    //отписаться от пользователя (удалить подписку)
+    $app->post('/user/subscription/delete', [UserController::class, "deleteSubscription"]);
 
-    //список друзей
-    $app->post('/user/follower/show', [UserController::class, "showFollowers"]);
+    //список подписчиков
+    $app->get('/user/subscribers/show', [UserController::class, "showSubscribers"]);
 
+    //список подписок
+    $app->get('/user/subscriptions/show', [UserController::class, "showSubscriptions"]);
 
 //    $app->group('/users', function (Group $group) {
 //        $group->get('', ListUsersAction::class);

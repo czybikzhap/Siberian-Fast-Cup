@@ -1,7 +1,7 @@
 <?php
 namespace App\Controller;
 
-use App\Entity\Follower;
+use App\Entity\Subscrib;
 use PDO;
 use Ramsey\Uuid\Uuid;
 use Slim\Psr7\Headers;
@@ -450,12 +450,12 @@ class UserController
 
         $this->userRepository->add($user, true);
 
-        var_dump($user);
+        //var_dump($user);
         return $response
             ->withStatus(201);
     }
 
-    public function addFollower(Request $request, Response $response)
+    public function addSubscription(Request $request, Response $response)
     {
         if(!$request->hasHeader('Token'))
         {
@@ -492,8 +492,16 @@ class UserController
                 ->withStatus(400);
         }
 
-        $follower = new Follower($user->getId(), $params['follower_id']);
-        var_dump($follower);
+        $rightuser = $this->userRepository->find($params['follower_id']);
+        if($rightuser === null)
+        {
+            $response->getBody()->write("User not found");
+
+            return $response
+                ->withStatus(422);
+        }
+
+        $follower = new Subscrib($user, $rightuser);
         $this->followerRepository->add($follower, true);
 
         $response->getBody()->write("Поздравляем друг добавлен!");
@@ -501,7 +509,7 @@ class UserController
             ->withStatus(201);
     }
 
-    public function deleteFollower(Request $request, Response $response)
+    public function deleteSubscription(Request $request, Response $response)
     {
         if(!$request->hasHeader('Token'))
         {
@@ -537,12 +545,89 @@ class UserController
                 ->withStatus(400);
         }
 
-        $follower = $this->followerRepository->findOneByFollower($user->getId(), $params['follower_id']);
+        $rightuser = $this->userRepository->find($params['follower_id']);
+        if($rightuser === null)
+        {
+            $response->getBody()->write("User not found");
+
+            return $response
+                ->withStatus(422);
+        }
+
+        $follower = $this->followerRepository->findOneByFollower($user->getId(), $rightuser->getId());
         $this->followerRepository->delete($follower, true);
 
-        $response->getBody()->write("Вы отписались от друга!");
+        $response->getBody()->write("Вы отписались!");
         return $response
             ->withStatus(201);
     }
 
+    //Подписчики
+    public function showSubscribers(Request $request, Response $response)
+    {
+        if(!$request->hasHeader('Token'))
+        {
+            $response->getBody()->write("Not authorized");
+
+            return $response
+                ->withStatus(401);
+        }
+
+        $token = $request->getHeader( 'Token');
+        $token = reset($token);
+        $user = $this->userRepository->findOneByToken($token);
+        if($user === null)
+        {
+            $response->getBody()->write("Token entered incorrectly");
+
+            return $response
+                ->withStatus(422);
+        }
+
+        $subscribers = $user->getSubscribers();
+
+        $params = [];
+
+        foreach ($subscribers as $key => $subscriber)
+        {
+            $params[$key] = $subscriber->getLeftUser()->toArray();
+        }
+        var_dump($params);
+        $response->getBody()->write(json_encode($params));
+        return $response
+            ->withStatus(201);
+    }
+
+    //Подписки
+    public function showSubscriptions(Request $request, Response $response)
+    {
+        if(!$request->hasHeader('Token'))
+        {
+            $response->getBody()->write("Not authorized");
+
+            return $response
+                ->withStatus(401);
+        }
+
+        $token = $request->getHeader( 'Token');
+        $token = reset($token);
+        $user = $this->userRepository->findOneByToken($token);
+        if($user === null)
+        {
+            $response->getBody()->write("Token entered incorrectly");
+
+            return $response
+                ->withStatus(422);
+        }
+        $params= [];
+        $subscriptions = $user->getSubscriptions();
+        foreach ($subscriptions as $key => $subscription)
+        {
+            $params[$key] = $subscription->getRightUser()->toArray();
+        }
+
+        $response->getBody()->write(json_encode($params));
+        return $response
+            ->withStatus(201);
+    }
 }

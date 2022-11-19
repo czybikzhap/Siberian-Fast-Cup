@@ -1,7 +1,7 @@
 <?php
 
 use App\Controller\UserController;
-use App\Entity\Follower;
+use App\Entity\Subscrib;
 use App\Entity\User;
 use App\Repository\FollowerRepository;
 use App\Repository\UserRepository;
@@ -23,7 +23,7 @@ $container->set(UserController::class, function (ContainerInterface $container) 
     $userRepository = $entityManager->getRepository(User::class);
 
     /** @var FollowerRepository $followerRepository */
-    $followerRepository = $entityManager->getRepository(Follower::class);
+    $followerRepository = $entityManager->getRepository(Subscrib::class);
 //    /** @var UserController $userIdentityRepository */
 //    $userIdentityRepository = $entityManager->getRepository(UserIdentity::class);
 
