@@ -31,9 +31,9 @@ class User{
     protected ?int $age;
     #[Column(type: 'string', unique: true, nullable: false)]
     protected ?string $token;
-    #[OneToMany( mappedBy: 'leftUser', targetEntity: Follower::class)]
-    private Collection $followers;
-    #[OneToMany( mappedBy: 'rightUser', targetEntity: Follower::class)]
+    #[OneToMany( mappedBy: 'leftUser', targetEntity: Subscrib::class)]
+    private Collection $subscriptions;
+    #[OneToMany( mappedBy: 'rightUser', targetEntity: Subscrib::class)]
     private Collection $subscribers;
 
     public function __construct(
@@ -54,7 +54,7 @@ class User{
         $this->phone        = $phone;
         $this->age          = $age;
         $this->token        = $token;
-        $this->followers    = new ArrayCollection();
+        $this->subscriptions    = new ArrayCollection();
         $this->subscribers    = new ArrayCollection();
     }
 
@@ -139,10 +139,6 @@ class User{
        return $this->token;
     }
 
-    public function getFollowers(): Collection
-    {
-        return $this->followers;
-    }
     public function toArray(): array
     {
         return [
@@ -156,11 +152,19 @@ class User{
     }
 
     /**
-     * @return Collection
+     * @return Collection<int, Subscrib>
      */
 
     public function getSubscribers(): Collection
     {
         return $this->subscribers;
+    }
+
+    /**
+     * @return Collection<int, Subscrib>
+     */
+    public function getSubscriptions(): Collection
+    {
+        return $this->subscriptions;
     }
 }

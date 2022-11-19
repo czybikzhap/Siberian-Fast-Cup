@@ -3,6 +3,9 @@ namespace App\Repository;
 
 use App\Entity\User;
 
+/**
+ * @method User|null find($id, $lockMode = null, $lockVersion = null)
+ */
 class UserRepository extends \Doctrine\ORM\EntityRepository
 {
     public function add(User $entity, bool $flush = false): void
