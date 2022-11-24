@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\FollowerRepository;
+use App\Repository\SubscribRepository;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\Table;
 
-#[Entity(repositoryClass: FollowerRepository::class), Table(name: 'subscrib')]
+#[Entity(repositoryClass: SubscribRepository::class), Table(name: 'subscrib')]
 class Subscrib
 {
     #[Id, Column(type: 'integer'), GeneratedValue(strategy: 'AUTO')]
