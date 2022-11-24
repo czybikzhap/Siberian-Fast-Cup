@@ -1,26 +1,20 @@
 <?php
 namespace App\Controller;
 
-use App\Entity\Subscrib;
-use PDO;
 use Ramsey\Uuid\Uuid;
-use Slim\Psr7\Headers;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 use App\Entity\User;
 use App\Repository\UserRepository;
-use App\Repository\FollowerRepository;
 
 class UserController
 {
 
     private ?UserRepository $userRepository;
-    private ?FollowerRepository $followerRepository;
 
-    public function __construct(UserRepository $userRepository = null, FollowerRepository $followerRepository = null)
+    public function __construct(UserRepository $userRepository = null)
     {
         $this->userRepository = $userRepository;
-        $this->followerRepository = $followerRepository;
     }
 
     #Регистрация пользователя
@@ -351,9 +345,24 @@ class UserController
             }
         }
 
+        if (array_key_exists ('lichess_name', $params))
+        {
+            $errors = $this->validateLichessname($params);
+            if (!empty($errors)) {
+                $newStr = json_encode($errors);
+                $response->getBody()->write($newStr);
+                return $response
+                    ->withStatus(422);
+            }
+
+            if ($user->getLichessName() !== $params['lichess_name']) {
+                $user->setLichessName($params['lichess_name']);
+            }
+        }
+
         $this->userRepository->add($user, true);
 
-        var_dump($user);
+        //var_dump($user);
         return $response
             ->withStatus(201);
 
@@ -391,6 +400,15 @@ class UserController
         $messages = null;
         if(empty($params['age'])){
             $messages = 'Age not be empty';
+        }
+        return $messages;
+    }
+
+    private function validateLichessname(array $params): ?string
+    {
+        $messages = null;
+        if(empty($params['lichess_name'])){
+            $messages = 'Lichess Name not be empty';
         }
         return $messages;
     }
@@ -455,179 +473,4 @@ class UserController
             ->withStatus(201);
     }
 
-    public function addSubscription(Request $request, Response $response)
-    {
-        if(!$request->hasHeader('Token'))
-        {
-            $response->getBody()->write("Not authorized");
-
-            return $response
-                ->withStatus(401);
-        }
-
-        $token = $request->getHeader( 'Token');
-        $token = reset($token);
-
-        $user = $this->userRepository->findOneByToken($token);
-        if($user === null)
-        {
-            $response->getBody()->write("Token entered incorrectly");
-
-            return $response
-                ->withStatus(422);
-        }
-
-        $params = json_decode($request->getBody()->getContents(), true);
-        if (array_key_exists ('follower_id', $params))
-        {
-            if(empty($params['follower_id']))
-            {
-                $response->getBody()->write("follower_id not be empty or null");
-                return $response
-                    ->withStatus(422);
-            }
-        }else{
-            $response->getBody()->write("follower_id not use");
-            return $response
-                ->withStatus(400);
-        }
-
-        $rightuser = $this->userRepository->find($params['follower_id']);
-        if($rightuser === null)
-        {
-            $response->getBody()->write("User not found");
-
-            return $response
-                ->withStatus(422);
-        }
-
-        $follower = new Subscrib($user, $rightuser);
-        $this->followerRepository->add($follower, true);
-
-        $response->getBody()->write("Поздравляем друг добавлен!");
-        return $response
-            ->withStatus(201);
-    }
-
-    public function deleteSubscription(Request $request, Response $response)
-    {
-        if(!$request->hasHeader('Token'))
-        {
-            $response->getBody()->write("Not authorized");
-
-            return $response
-                ->withStatus(401);
-        }
-
-        $token = $request->getHeader( 'Token');
-        $token = reset($token);
-        $user = $this->userRepository->findOneByToken($token);
-        if($user === null)
-        {
-            $response->getBody()->write("Token entered incorrectly");
-
-            return $response
-                ->withStatus(422);
-        }
-
-        $params = json_decode($request->getBody()->getContents(), true);
-        if (array_key_exists ('follower_id', $params))
-        {
-            if(empty($params['follower_id']))
-            {
-                $response->getBody()->write("id_follower not be empty or null");
-                return $response
-                    ->withStatus(400);
-            }
-        }else{
-            $response->getBody()->write("id_follower not use");
-            return $response
-                ->withStatus(400);
-        }
-
-        $rightuser = $this->userRepository->find($params['follower_id']);
-        if($rightuser === null)
-        {
-            $response->getBody()->write("User not found");
-
-            return $response
-                ->withStatus(422);
-        }
-
-        $follower = $this->followerRepository->findOneByFollower($user->getId(), $rightuser->getId());
-        $this->followerRepository->delete($follower, true);
-
-        $response->getBody()->write("Вы отписались!");
-        return $response
-            ->withStatus(201);
-    }
-
-    //Подписчики
-    public function showSubscribers(Request $request, Response $response)
-    {
-        if(!$request->hasHeader('Token'))
-        {
-            $response->getBody()->write("Not authorized");
-
-            return $response
-                ->withStatus(401);
-        }
-
-        $token = $request->getHeader( 'Token');
-        $token = reset($token);
-        $user = $this->userRepository->findOneByToken($token);
-        if($user === null)
-        {
-            $response->getBody()->write("Token entered incorrectly");
-
-            return $response
-                ->withStatus(422);
-        }
-
-        $subscribers = $user->getSubscribers();
-
-        $params = [];
-
-        foreach ($subscribers as $key => $subscriber)
-        {
-            $params[$key] = $subscriber->getLeftUser()->toArray();
-        }
-        var_dump($params);
-        $response->getBody()->write(json_encode($params));
-        return $response
-            ->withStatus(201);
-    }
-
-    //Подписки
-    public function showSubscriptions(Request $request, Response $response)
-    {
-        if(!$request->hasHeader('Token'))
-        {
-            $response->getBody()->write("Not authorized");
-
-            return $response
-                ->withStatus(401);
-        }
-
-        $token = $request->getHeader( 'Token');
-        $token = reset($token);
-        $user = $this->userRepository->findOneByToken($token);
-        if($user === null)
-        {
-            $response->getBody()->write("Token entered incorrectly");
-
-            return $response
-                ->withStatus(422);
-        }
-        $params= [];
-        $subscriptions = $user->getSubscriptions();
-        foreach ($subscriptions as $key => $subscription)
-        {
-            $params[$key] = $subscription->getRightUser()->toArray();
-        }
-
-        $response->getBody()->write(json_encode($params));
-        return $response
-            ->withStatus(201);
-    }
 }

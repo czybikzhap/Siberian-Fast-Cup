@@ -31,10 +31,14 @@ class User{
     protected ?int $age;
     #[Column(type: 'string', unique: true, nullable: false)]
     protected ?string $token;
+    #[Column(type: 'string', unique: true, nullable: false)]
+    protected ?string $lichess_name;
     #[OneToMany( mappedBy: 'leftUser', targetEntity: Subscrib::class)]
     private Collection $subscriptions;
     #[OneToMany( mappedBy: 'rightUser', targetEntity: Subscrib::class)]
     private Collection $subscribers;
+    #[OneToMany( mappedBy: 'user_id', targetEntity: Game::class)]
+    private Collection $games;
 
     public function __construct(
         string $lastname,
@@ -56,6 +60,7 @@ class User{
         $this->token        = $token;
         $this->subscriptions    = new ArrayCollection();
         $this->subscribers    = new ArrayCollection();
+        $this->games    = new ArrayCollection();
     }
 
     public function setLastName(string $lastname)
@@ -166,5 +171,37 @@ class User{
     public function getSubscriptions(): Collection
     {
         return $this->subscriptions;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getLichessName(): ?string
+    {
+        return $this->lichess_name;
+    }
+
+    /**
+     * @param string|null $lichess_name
+     */
+    public function setLichessName(?string $lichess_name): void
+    {
+        $this->lichess_name = $lichess_name;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getGames(): Collection
+    {
+        return $this->games;
+    }
+
+    /**
+     * @param Collection $games
+     */
+    public function setGames(Collection $games): void
+    {
+        $this->games = $games;
     }
 }
