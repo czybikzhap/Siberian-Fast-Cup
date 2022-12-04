@@ -32,7 +32,6 @@ return function (App $app) {
     //отписаться от пользователя (удалить подписку)
     $app->post('/user/subscription/delete', [SubscribController::class, "deleteSubscription"]);
 
-    //
     //список подписчиков
     $app->get('/user/subscribers/show', [SubscribController::class, "showSubscribers"]);
 
