@@ -3,28 +3,39 @@ namespace App\Service;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Psr\Http\Message\ResponseInterface;
 
 class LiClient
 {
+    private Client $client;
+    protected $x;
+
+    public function __construct()
+    {
+        $this->client = new Client([
+            'base_uri' => 'https://lichess.org/api/'
+        ]);
+    }
+
     /**
      * @throws GuzzleException
      */
-    public function getGames(?string $lichess_name): ?ResponseInterface
+    public function getGames(string $lichessName): ?array
     {
-        $client = new Client([
-            'base_uri' => 'https://lichess.org/api/games/user/' . "$lichess_name"
-        ]);
 
-        $games = $client->request('GET', '',
-            [
-                'headers' => [
-                    'Accept' => ['application/x-ndjson']
-                ],
-                'query' => 'max=1'
-            ]
-        );
+        $response = $this->client->request('GET', "games/user/" . $lichessName,
+        [
+            'headers' => [
+                'Accept' => ['application/x-ndjson']
+            ],
+            'query' => 'max=10'
+        ]
+    );
 
-        return $games;
+        if($response->getStatusCode() === 200){
+            return json_decode($response->getBody()->getContents(), true);
+        }
+        throw new \Exception("LiClient status not 200!");
     }
+
+
 }
