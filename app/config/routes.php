@@ -44,9 +44,13 @@ return function (App $app) {
     $app->get('/game/show', [GameController::class, "showGame"]);
 
     //Отправить сообщение пользователю
-    $app->get('/message/send', [MessageController::class, "sendMessage"]);
+    $app->post('/message/send', [MessageController::class, "sendMessage"]);
 
-//    $app->group('/users', function (Group $group) {
+    //Cписок сообщений диалога
+    $app->get('/message/show', [MessageController::class, "getMessages"]);
+
+
+//    $app->group('/users', function (Group $group){
 //        $group->get('', ListUsersAction::class);
 //        $group->get('/{id}', ViewUserAction::class);
 //    });

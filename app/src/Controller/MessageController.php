@@ -84,7 +84,7 @@ class MessageController
             ->withStatus(201);
     }
 
-    public function showMessage(Request $request, Response $response)
+    public function getMessages(Request $request, Response $response)
     {
         if(!$request->hasHeader('Token'))
         {
@@ -106,6 +106,15 @@ class MessageController
                 ->withStatus(422);
         }
 
-        // TODO getMessage
+        //TODO getMessage
+
+        $receiverMessages = json_encode($user->getReceiverMessages());
+        $senderMessages = json_encode($user->getSenderMessages());
+        $messages = $receiverMessages . $senderMessages;
+
+        $response->getBody()->write($messages);
+        return $response
+            ->withStatus(200);
+
     }
 }
