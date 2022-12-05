@@ -1,6 +1,7 @@
 <?php
 
 use App\Controller\GameController;
+use App\Controller\MessageController;
 use App\Controller\SubscribController;
 use App\Controller\UserController;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -41,6 +42,9 @@ return function (App $app) {
     //список партий
     //система очередей
     $app->get('/game/show', [GameController::class, "showGame"]);
+
+    //Отправить сообщение пользователю
+    $app->get('/message/send', [MessageController::class, "sendMessage"]);
 
 //    $app->group('/users', function (Group $group) {
 //        $group->get('', ListUsersAction::class);

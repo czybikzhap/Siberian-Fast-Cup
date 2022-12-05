@@ -7,7 +7,6 @@ use App\Entity\Game;
 use App\Repository\GameRepository;
 use App\Repository\UserRepository;
 use App\Service\LiClient;
-use Doctrine\DBAL\Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
@@ -72,7 +71,6 @@ class GameController
         );
 
         $this->gameRepository->add($game, true);
-
 
         $response->getBody()->write("Поздравляю, партии сохранены!");
         return $response

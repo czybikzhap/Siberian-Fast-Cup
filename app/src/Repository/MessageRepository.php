@@ -2,12 +2,12 @@
 
 namespace App\Repository;
 
-use App\Entity\Game;
+use App\Entity\Message;
 use Doctrine\ORM\EntityRepository;
 
-class GameRepository extends EntityRepository
+class MessageRepository extends EntityRepository
 {
-    public function add(Game $entity, bool $flush = false): void
+    public function add(Message $entity, bool $flush = false): void
     {
         #persist сохранение в памяти, flush сохранение в бд
         $this->getEntityManager()->persist($entity);
@@ -17,7 +17,7 @@ class GameRepository extends EntityRepository
         }
     }
 
-    public function delete(Game $entity, bool $flush = false): void
+    public function delete(Message $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 

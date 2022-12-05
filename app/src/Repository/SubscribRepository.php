@@ -2,8 +2,9 @@
 namespace App\Repository;
 
 use App\Entity\Subscrib;
+use Doctrine\ORM\EntityRepository;
 
-class SubscribRepository extends \Doctrine\ORM\EntityRepository
+class SubscribRepository extends EntityRepository
 {
     public function add(Subscrib $entity, bool $flush = false): void
     {
