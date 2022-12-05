@@ -1,12 +1,15 @@
 <?php
 
 use App\Controller\GameController;
+use App\Controller\MessageController;
 use App\Controller\SubscribController;
 use App\Controller\UserController;
 use App\Entity\Game;
+use App\Entity\Message;
 use App\Entity\Subscrib;
 use App\Entity\User;
 use App\Repository\GameRepository;
+use App\Repository\MessageRepository;
 use App\Repository\SubscribRepository;
 use App\Repository\UserRepository;
 use App\Service\LiClient;
@@ -79,5 +82,18 @@ return [
 
     LiClient::class => function(){
         return new LiClient();
-    }
+    },
+
+        MessageController::class => function (ContainerInterface $container) {
+        /** @var EntityManager $entityManager */
+        $entityManager = $container->get(EntityManager::class);
+
+        /** @var UserRepository $userRepository */
+        $userRepository = $entityManager->getRepository(User::class);
+
+        /** @var MessageRepository $gameRepository */
+        $messageRepository = $entityManager->getRepository(Message::class);
+
+        return new MessageController($userRepository, $messageRepository);
+    },
 ];
