@@ -39,6 +39,10 @@ class User{
     private Collection $subscribers;
     #[OneToMany( mappedBy: 'user_id', targetEntity: Game::class)]
     private Collection $games;
+    #[OneToMany( mappedBy: 'sender_user_id', targetEntity: Message::class)]
+    private Collection $senderMessages;
+    #[OneToMany( mappedBy: 'receiver_user_id', targetEntity: Message::class)]
+    private Collection $receiverMessages;
 
     public function __construct(
         string $lastname,
@@ -50,17 +54,19 @@ class User{
         int $age = null,
         string $token = null)
     {
-        $this->lastname     = $lastname;
-        $this->firstname    = $firstname;
-        $this->secondname   = $secondname;
-        $this->email        = $email;
-        $this->password     = $password;
-        $this->phone        = $phone;
-        $this->age          = $age;
-        $this->token        = $token;
+        $this->lastname         = $lastname;
+        $this->firstname        = $firstname;
+        $this->secondname       = $secondname;
+        $this->email            = $email;
+        $this->password         = $password;
+        $this->phone            = $phone;
+        $this->age              = $age;
+        $this->token            = $token;
         $this->subscriptions    = new ArrayCollection();
-        $this->subscribers    = new ArrayCollection();
-        $this->games    = new ArrayCollection();
+        $this->subscribers      = new ArrayCollection();
+        $this->games            = new ArrayCollection();
+        $this->senderMessages   = new ArrayCollection();
+        $this->receiverMessages = new ArrayCollection();
     }
 
     public function setLastName(string $lastname)
@@ -192,7 +198,7 @@ class User{
     /**
      * @return Collection
      */
-    public function getGames(): Collection
+    public function getGames(): ?Collection
     {
         return $this->games;
     }
@@ -203,5 +209,37 @@ class User{
     public function setGames(Collection $games): void
     {
         $this->games = $games;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getSenderMessages(): ?Collection
+    {
+        return $this->senderMessages;
+    }
+
+    /**
+     * @param Collection $senderMessages
+     */
+    public function setSenderMessages(Collection $senderMessages): void
+    {
+        $this->senderMessages = $senderMessages;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getReceiverMessages(): ?Collection
+    {
+        return $this->receiverMessages;
+    }
+
+    /**
+     * @param Collection $receiverMessages
+     */
+    public function setReceiverMessages(Collection $receiverMessages): void
+    {
+        $this->receiverMessages = $receiverMessages;
     }
 }
