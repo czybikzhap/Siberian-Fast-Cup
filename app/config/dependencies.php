@@ -84,14 +84,14 @@ return [
         return new LiClient();
     },
 
-        MessageController::class => function (ContainerInterface $container) {
+    MessageController::class => function (ContainerInterface $container) {
         /** @var EntityManager $entityManager */
         $entityManager = $container->get(EntityManager::class);
 
         /** @var UserRepository $userRepository */
         $userRepository = $entityManager->getRepository(User::class);
 
-        /** @var MessageRepository $gameRepository */
+        /** @var MessageRepository $messageRepository */
         $messageRepository = $entityManager->getRepository(Message::class);
 
         return new MessageController($userRepository, $messageRepository);

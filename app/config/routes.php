@@ -4,12 +4,17 @@ use App\Controller\GameController;
 use App\Controller\MessageController;
 use App\Controller\SubscribController;
 use App\Controller\UserController;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
+use Slim\Psr7\Request;
+use Slim\Psr7\Response;
 
 return function (App $app) {
     //Регистрация пользователей
+    $app->get('/', function (Request $request, Response $response){
+        $response->getBody()->write('Hello');
+
+        return $response;
+    });
     $app->post('/signup', [UserController::class, "signUp"]);
 
     //Вход в личный кабинет
