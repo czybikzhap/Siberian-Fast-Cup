@@ -7,7 +7,6 @@ use GuzzleHttp\Exception\GuzzleException;
 class LiClient
 {
     private Client $client;
-    protected $x;
 
     public function __construct()
     {

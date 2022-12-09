@@ -30,8 +30,72 @@ class UserController
                 ->withStatus(422);
         }
 
-        $user = new User($params['lastname'], $params['email'], password_hash($params['password'], PASSWORD_DEFAULT), $params['firstname']?? null, $params['secondname']?? null, $params['phone']?? null, $params['age']?? null);
+        $user = new User(
+            $params['lastname'],
+            $params['email'],
+            password_hash($params['password'], PASSWORD_DEFAULT),
+            $params['firstname']?? null,
+            $params['secondname']?? null,
+            $params['phone']?? null,
+            $params['age']?? null
+        );
         $this->userRepository->add($user, true);
+
+        $connection = new \PhpAmqpLib\Connection\AMQPStreamConnection(
+            'rabbitmq',
+            5672,
+            'rabbitmq',
+            'rabbitmq'
+        );
+        $channel = $connection->channel();
+
+        $channel->exchange_declare(
+            'router',
+            'direct'
+        );
+
+        $channel->queue_declare(
+            'push-queue',
+            false,
+            true,
+            false
+        );
+
+        $channel->queue_bind(
+            'push-queue',
+            'router',
+            'push'
+        );
+
+        //Публикация сообщения в очередь
+        $message = new \PhpAmqpLib\Message\AMQPMessage($user->getEmail(),
+            [
+                'content_type' => 'text/plain',
+                'delivery_mode' => \PhpAmqpLib\Message\AMQPMessage::DELIVERY_MODE_PERSISTENT,
+            ]);
+
+        $channel->basic_publish(
+            $message,
+            'router',
+            'push'
+        );
+
+        //слушаем
+        $callback = function($message) {
+            var_dump(" [x] Received ", $message->body);
+        };
+
+        //Уходим слушать сообщения из очереди в бесконечный цикл
+        $channel->basic_consume('push-queue',
+            '',
+            false,
+            true,
+            false,
+            false,
+            $callback);
+
+        $channel->close();
+        $connection->close();
 
         $response->getBody()->write("Поздравляю, аккаунт создан!");
         return $response->withStatus(201);
