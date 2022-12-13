@@ -1,6 +1,8 @@
 <?php
 namespace App\Controller;
 
+use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Message\AMQPMessage;
 use Ramsey\Uuid\Uuid;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
@@ -39,9 +41,10 @@ class UserController
             $params['phone']?? null,
             $params['age']?? null
         );
-        $this->userRepository->add($user, true);
+        //$this->userRepository->add($user, true);
+// диспатчер событий менеджер событий, генерация событий evon dispatcher
 
-        $connection = new \PhpAmqpLib\Connection\AMQPStreamConnection(
+        $connection = new AMQPStreamConnection(
             'rabbitmq',
             5672,
             'rabbitmq',
@@ -49,50 +52,20 @@ class UserController
         );
         $channel = $connection->channel();
 
-        $channel->exchange_declare(
-            'router',
-            'direct'
-        );
-
         $channel->queue_declare(
-            'push-queue',
+            'hello',
             false,
-            true,
+            false,
+            false,
             false
         );
 
-        $channel->queue_bind(
-            'push-queue',
-            'router',
-            'push'
-        );
-
         //Публикация сообщения в очередь
-        $message = new \PhpAmqpLib\Message\AMQPMessage($user->getEmail(),
-            [
-                'content_type' => 'text/plain',
-                'delivery_mode' => \PhpAmqpLib\Message\AMQPMessage::DELIVERY_MODE_PERSISTENT,
-            ]);
+        $message = new AMQPMessage($user->getEmail());
 
-        $channel->basic_publish(
-            $message,
-            'router',
-            'push'
-        );
+        $channel->basic_publish($message,'','email');
 
-        //слушаем
-        $callback = function($message) {
-            var_dump(" [x] Received ", $message->body);
-        };
-
-        //Уходим слушать сообщения из очереди в бесконечный цикл
-        $channel->basic_consume('push-queue',
-            '',
-            false,
-            true,
-            false,
-            false,
-            $callback);
+        echo " [x] Sent email\n";
 
         $channel->close();
         $connection->close();
