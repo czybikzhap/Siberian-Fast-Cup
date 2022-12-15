@@ -1,8 +1,7 @@
 <?php
 namespace App\Controller;
 
-use PhpAmqpLib\Connection\AMQPStreamConnection;
-use PhpAmqpLib\Message\AMQPMessage;
+use App\Service\QueueService;
 use Ramsey\Uuid\Uuid;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
@@ -13,10 +12,11 @@ class UserController
 {
 
     private ?UserRepository $userRepository;
-
-    public function __construct(UserRepository $userRepository = null)
+    private ?QueueService $queueService;
+    public function __construct(UserRepository $userRepository = null, QueueService $queueService = null)
     {
         $this->userRepository = $userRepository;
+        $this->queueService   = $queueService;
     }
 
     #Регистрация пользователя
@@ -42,33 +42,11 @@ class UserController
             $params['age']?? null
         );
         //$this->userRepository->add($user, true);
-// диспатчер событий менеджер событий, генерация событий evon dispatcher
 
-        $connection = new AMQPStreamConnection(
-            'rabbitmq',
-            5672,
-            'rabbitmq',
-            'rabbitmq'
-        );
-        $channel = $connection->channel();
+        // диспатчер событий менеджер событий, генерация событий evon dispatcher
 
-        $channel->queue_declare(
-            'hello',
-            false,
-            false,
-            false,
-            false
-        );
-
-        //Публикация сообщения в очередь
-        $message = new AMQPMessage($user->getEmail());
-
-        $channel->basic_publish($message,'','email');
-
-        echo " [x] Sent email\n";
-
-        $channel->close();
-        $connection->close();
+        // Создание экземпляра класса, Вызвать метод и отправить необходимле сообщение, которое нужно поместить в очередь
+        $this->queueService->publishMessage($user->getEmail());
 
         $response->getBody()->write("Поздравляю, аккаунт создан!");
         return $response->withStatus(201);
