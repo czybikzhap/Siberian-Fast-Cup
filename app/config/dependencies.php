@@ -13,6 +13,7 @@ use App\Repository\MessageRepository;
 use App\Repository\SubscribRepository;
 use App\Repository\UserRepository;
 use App\Service\LiClient;
+use App\Service\QueueService;
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Psr\Container\ContainerInterface;
@@ -61,8 +62,9 @@ return [
         /** @var UserRepository $userRepository */
         $userRepository = $entityManager->getRepository(User::class);
 
-        $connection = $entityManager->getConnection();
-        return new UserController($userRepository, $connection);
+        $queueService = $container->get(QueueService::class);
+
+        return new UserController($userRepository, $queueService);
     },
 
     GameController::class => function (ContainerInterface $container) {
@@ -96,4 +98,8 @@ return [
 
         return new MessageController($userRepository, $messageRepository);
     },
+
+    QueueService::class => function(){
+        return new QueueService();
+    }
 ];

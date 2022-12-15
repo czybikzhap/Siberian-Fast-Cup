@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-
 use App\Entity\Game;
 use App\Repository\GameRepository;
 use App\Repository\UserRepository;
