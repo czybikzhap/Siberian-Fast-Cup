@@ -18,37 +18,6 @@ return function (App $app) {
         return $response;
     });
 
-//    //Получение данных о пользователе
-//    $app->get('/user/info', [UserController::class, "getInfo"]);
-//
-//    //Редактирование данных о пользователе
-//    $app->get('/user/edit', [UserController::class, "editIInfo"]);
-//
-//    //Удалить пользователе
-//    $app->delete('/user/delete', [UserController::class, "delete"]);
-//
-//    //Выйти из профиля пользователя
-//    $app->get('/user/signOut', [UserController::class, "signOut"]);
-//
-//    //подписаться на пользователя (добавить подписку на пользователя)
-//    $app->post('/sub/subscription/add', [SubscribController::class, "addSubscription"]);
-//
-//    //отписаться от пользователя (удалить подписку)
-//    $app->post('/sub/subscription/delete', [SubscribController::class, "deleteSubscription"]);
-//
-//    //список подписчиков
-//    $app->get('/sub/subscribers/show', [SubscribController::class, "showSubscribers"]);
-//
-//    //список подписок
-//    $app->get('/sub/subscriptions/show', [SubscribController::class, "showSubscriptions"]);
-//
-//    //Отправить сообщение пользователю
-//    $app->post('/message/send', [MessageController::class, "sendMessage"]);
-//
-//    //показать сообщения диалога
-//    $app->get('/message/show', [MessageController::class, "getMessages"]);
-
-
     //Регистрация пользователей
     $app->post('/signUp', [UserController::class, "signUp"]);
 
