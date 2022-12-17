@@ -19,9 +19,9 @@ class GameController
 
     public function __construct(UserRepository $userRepository, GameRepository $gameRepository, LiClient $liClient)
     {
-        $this->userRepository = $userRepository;
-        $this->gameRepository = $gameRepository;
-        $this->liClient = $liClient;
+        $this->userRepository   = $userRepository;
+        $this->gameRepository   = $gameRepository;
+        $this->liClient         = $liClient;
     }
 
     /**
@@ -40,6 +40,8 @@ class GameController
         $token = $request->getHeader( 'Token');
         $token = reset($token);
 
+        //проверка на наличие токена
+
         $user = $this->userRepository->findOneByToken($token);
         if($user === null)
         {
@@ -50,7 +52,7 @@ class GameController
         }
 
         try {
-            $games = $this->liClient->getGames($user->getLichessName());
+            $games = $this->liClient->getGames($user->getLichessname());
         }catch (\Throwable $throwable)
         {
             //TODO Логирование сделать
@@ -76,4 +78,3 @@ class GameController
             ->withStatus(201);
     }
 }
-

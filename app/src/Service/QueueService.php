@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Service\Consumers\EmailConsumer;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+
 class QueueService
 {
     function publishMessage(string $text){
@@ -61,7 +62,6 @@ class QueueService
                 switch ($property){
                     case 'email':
                         EmailConsumer::sendToEmail($msg->body);
-                        $msg->ack();
                         break;
                 }
         };

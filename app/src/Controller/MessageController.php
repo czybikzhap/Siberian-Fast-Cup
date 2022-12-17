@@ -72,12 +72,11 @@ class MessageController
             $params['messages_text'],
             $user,
             $receiver_user,
-            $params['status'],
+            "отправлено",
             $dataSend
         );
 
         $this->messageRepository->add($message, true);
-
 
         $response->getBody()->write("Сообщение отправленно успешно!");
         return $response
@@ -106,15 +105,33 @@ class MessageController
                 ->withStatus(422);
         }
 
-        //TODO getMessage
+        $params = json_decode($request->getBody()->getContents(), true);
 
-        $receiverMessages = json_encode($user->getReceiverMessages());
-        $senderMessages = json_encode($user->getSenderMessages());
-        $messages = $receiverMessages . $senderMessages;
+        if (array_key_exists ('receiver_user_id', $params))
+        {
+            if(empty($params['receiver_user_id']))
+            {
+                $response->getBody()->write("receiver_user_id not be empty or null");
+                return $response
+                    ->withStatus(422);
+            }
+        }else{
+            $response->getBody()->write("receiver_user_id not use");
+            return $response
+                ->withStatus(400);
+        }
 
-        $response->getBody()->write($messages);
+        $receiver_user = $this->userRepository->find($params['receiver_user_id']);
+        if($receiver_user === null)
+        {
+            $response->getBody()->write("User not found");
+            return $response
+                ->withStatus(422);
+        }
+        $message = $this->messageRepository->findArrayBy($user->getId(), $receiver_user->getId());
+        //print_r($message);
+        $response->getBody()->write(json_encode($message));
         return $response
             ->withStatus(200);
-
     }
 }
