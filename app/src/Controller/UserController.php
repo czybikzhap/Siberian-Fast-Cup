@@ -33,20 +33,20 @@ class UserController
         }
 
         $user = new User(
-            $params['lastname'],
+            $params['lastName'],
             $params['email'],
             password_hash($params['password'], PASSWORD_DEFAULT),
-            $params['firstname']?? null,
-            $params['secondname']?? null,
+            $params['firstName']?? null,
+            $params['secondName']?? null,
             $params['phone']?? null,
             $params['age']?? null
         );
-        //$this->userRepository->add($user, true);
+        $this->userRepository->add($user, true);
 
         // диспатчер событий менеджер событий, генерация событий evon dispatcher
 
         // Создание экземпляра класса, Вызвать метод и отправить необходимле сообщение, которое нужно поместить в очередь
-        $this->queueService->publishMessage($user->getEmail());
+        //$this->queueService->publishMessage($user->getEmail());
 
         $response->getBody()->write("Поздравляю, аккаунт создан!");
         return $response->withStatus(201);
@@ -59,7 +59,7 @@ class UserController
         $lastnameError = $this->validateLastname($params);
         if(!empty($lastnameError))
         {
-            $messages['lastname']  = $lastnameError;
+            $messages['lastName']  = $lastnameError;
         }
 
         $emailError = $this->validateEmail($params);
@@ -80,7 +80,7 @@ class UserController
     private function validateLastname(array $params): ?string
     {
         $messages = null;
-        if(empty($params['lastname'])){
+        if(empty($params['lastName'])){
            $messages = 'Lastname not be empty';
         }
         return $messages;
@@ -254,7 +254,7 @@ class UserController
                 ->withStatus(422);
         }
 
-        if (array_key_exists ('lastname', $params))
+        if (array_key_exists ('lastName', $params))
         {
             $errors = $this->validateLastname($params);
             if (!empty($errors)) {
@@ -264,12 +264,12 @@ class UserController
                     ->withStatus(422);
             }
 
-            if ($user->getLastName() !== $params['lastname']) {
-                $user->setLastName($params['lastname']);
+            if ($user->getLastName() !== $params['lastName']) {
+                $user->setLastName($params['lastName']);
             }
         }
 
-        if (array_key_exists ('firstname', $params))
+        if (array_key_exists ('firstName', $params))
         {
             $errors = $this->validateFirstname($params);
             if (!empty($errors)) {
@@ -279,12 +279,12 @@ class UserController
                     ->withStatus(422);
             }
 
-            if ($user->getFirstName() !== $params['firstname']) {
-                $user->setFirstName($params['firstname']);
+            if ($user->getFirstName() !== $params['firstName']) {
+                $user->setFirstName($params['firstName']);
             }
         }
 
-        if (array_key_exists ('secondname', $params))
+        if (array_key_exists ('secondName', $params))
         {
             $errors = $this->validateSecondname($params);
             if (!empty($errors)) {
@@ -294,8 +294,8 @@ class UserController
                     ->withStatus(422);
             }
 
-            if ($user->getSecondName() !== $params['secondname']) {
-                $user->setSecondName($params['secondname']);
+            if ($user->getSecondName() !== $params['secondName']) {
+                $user->setSecondName($params['secondName']);
             }
         }
 
@@ -360,9 +360,9 @@ class UserController
             }
         }
 
-        if (array_key_exists ('lichess_name', $params))
+        if (array_key_exists ('liChessName', $params))
         {
-            $errors = $this->validateLichessname($params);
+            $errors = $this->validateLiChessName($params);
             if (!empty($errors)) {
                 $newStr = json_encode($errors);
                 $response->getBody()->write($newStr);
@@ -370,14 +370,13 @@ class UserController
                     ->withStatus(422);
             }
 
-            if ($user->getLichessName() !== $params['lichess_name']) {
-                $user->setLichessName($params['lichess_name']);
+            if ($user->getLichessname() !== $params['liChessName']) {
+                $user->setLichessname($params['liChessName']);
             }
         }
 
         $this->userRepository->add($user, true);
 
-        //var_dump($user);
         return $response
             ->withStatus(201);
 
@@ -386,8 +385,8 @@ class UserController
     private function validateFirstname(array $params): ?string
     {
         $messages = null;
-        if(empty($params['firstname'])){
-            $messages = 'Firstname not be empty';
+        if(empty($params['firstName'])){
+            $messages = 'FirstName not be empty';
         }
         return $messages;
     }
@@ -395,8 +394,8 @@ class UserController
     private function validateSecondname(array $params): ?string
     {
         $messages = null;
-        if(empty($params['secondname'])){
-            $messages = 'Secondname not be empty';
+        if(empty($params['secondName'])){
+            $messages = 'SecondName not be empty';
         }
         return $messages;
     }
@@ -419,10 +418,10 @@ class UserController
         return $messages;
     }
 
-    private function validateLichessname(array $params): ?string
+    private function validateLiChessName(array $params): ?string
     {
         $messages = null;
-        if(empty($params['lichess_name'])){
+        if(empty($params['liChessName'])){
             $messages = 'Lichess Name not be empty';
         }
         return $messages;
@@ -483,9 +482,7 @@ class UserController
 
         $this->userRepository->add($user, true);
 
-        //var_dump($user);
         return $response
             ->withStatus(201);
     }
-
 }

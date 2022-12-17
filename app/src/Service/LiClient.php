@@ -18,10 +18,9 @@ class LiClient
     /**
      * @throws GuzzleException
      */
-    public function getGames(string $lichessName): ?array
+    public function getGames(string $liChessName): ?array
     {
-
-        $response = $this->client->request('GET', "games/user/" . $lichessName,
+        $response = $this->client->request('GET', "games/user/" . $liChessName,
         [
             'headers' => [
                 'Accept' => ['application/x-ndjson']
@@ -35,6 +34,4 @@ class LiClient
         }
         throw new \Exception("LiClient status not 200!");
     }
-
-
 }

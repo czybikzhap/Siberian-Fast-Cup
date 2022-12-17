@@ -22,26 +22,26 @@ class Message{
     #[JoinColumn(name: 'sender_user_id', referencedColumnName: 'id')]
     private User $sender_user_id;
     #[ManyToOne(targetEntity: User::class)]
-    #[JoinColumn(name: 'sender_user_id', referencedColumnName: 'id')]
+    #[JoinColumn(name: 'receiver_user_id', referencedColumnName: 'id')]
     private User $receiver_user_id;
     #[Column(type: 'string', nullable: false)]
     protected string $status;
-    #[Column(type: 'DATE', nullable: false)]
-    protected DateTime $data;
+    #[Column(type: 'datetime', nullable: false)]
+    protected DateTime $datetime;
 
     public function __construct(
-        string $messages_text,
-        User $sender_user_id,
-        User $receiver_user_id,
-        string $status,
-        DateTime $data
+        string      $messages_text,
+        User        $sender_user_id,
+        User        $receiver_user_id,
+        string      $status,
+        DateTime    $datetime
         )
     {
         $this->messages_text    = $messages_text;
         $this->sender_user_id   = $sender_user_id;
         $this->receiver_user_id = $receiver_user_id;
         $this->status           = $status;
-        $this->data             = $data;
+        $this->datetime         = $datetime;
     }
 
     /**
@@ -119,16 +119,16 @@ class Message{
     /**
      * @return DateTime
      */
-    public function getData(): DateTime
+    public function getDatetime(): DateTime
     {
-        return $this->data;
+        return $this->datetime;
     }
 
     /**
-     * @param DateTime $data
+     * @param DateTime $datetime
      */
-    public function setData(DateTime $data): void
+    public function setDatetime(DateTime $datetime): void
     {
-        $this->data = $data;
+        $this->datetime = $datetime;
     }
 }

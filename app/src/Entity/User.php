@@ -16,11 +16,11 @@ class User{
     #[Id, Column(type: 'integer'), GeneratedValue(strategy: 'AUTO')]
     protected int $id;
     #[Column(type: 'string', nullable: false)]
-    protected string $lastname;
+    protected string $lastName;
     #[Column(type: 'string', nullable: false)]
-    protected ?string  $firstname;
+    protected ?string $firstName;
     #[Column(type: 'string', nullable: false)]
-    protected ?string $secondname;
+    protected ?string $secondName;
     #[Column(type: 'string', unique: true, nullable: false)]
     protected string $email;
     #[Column(type: 'string', nullable: false)]
@@ -54,9 +54,9 @@ class User{
         int $age = null,
         string $token = null)
     {
-        $this->lastname         = $lastname;
-        $this->firstname        = $firstname;
-        $this->secondname       = $secondname;
+        $this->lastName         = $lastname;
+        $this->firstName        = $firstname;
+        $this->secondName       = $secondname;
         $this->email            = $email;
         $this->password         = $password;
         $this->phone            = $phone;
@@ -69,19 +69,19 @@ class User{
         $this->receiverMessages = new ArrayCollection();
     }
 
-    public function setLastName(string $lastname)
+    public function setLastName(string $lastName)
     {
-        $this->lastname = $lastname;
+        $this->lastName = $lastName;
     }
 
-    public function setFirstName(string $firstname)
+    public function setFirstName(string $firstName)
     {
-        $this->firstname = $firstname;
+        $this->firstName = $firstName;
     }
 
-    public function setSecondName(string $secondname)
+    public function setSecondName(string $secondName)
     {
-        $this->secondname = $secondname;
+        $this->secondName = $secondName;
     }
 
     public function setEmail(string $email)
@@ -114,17 +114,17 @@ class User{
 
     public function getLastName(): ?string
     {
-        return $this->lastname;
+        return $this->lastName;
     }
 
     public function getFirstName(): ?string
     {
-        return $this->firstname;
+        return $this->firstName;
     }
 
     public function getSecondName(): ?string
     {
-        return $this->secondname;
+        return $this->secondName;
     }
 
     public function getEmail(): ?string
@@ -182,7 +182,7 @@ class User{
     /**
      * @return string|null
      */
-    public function getLichessName(): ?string
+    public function getLichessname(): ?string
     {
         return $this->lichess_name;
     }
@@ -190,7 +190,7 @@ class User{
     /**
      * @param string|null $lichess_name
      */
-    public function setLichessName(?string $lichess_name): void
+    public function setLichessname(?string $lichess_name): void
     {
         $this->lichess_name = $lichess_name;
     }

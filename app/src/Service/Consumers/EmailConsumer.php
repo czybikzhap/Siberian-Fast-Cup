@@ -27,7 +27,7 @@ class EmailConsumer
             //Content
             $mail->isHTML(true);
             $mail->Subject = 'lheujt fdvhdfv';
-            $mail->Body = ';l;l;l;l;l;l;l;l;l;l;';
+            $mail->Body = 'ssssssssssssssssssssssss';
 
             $mail->send();
             echo 'Message has been sent';

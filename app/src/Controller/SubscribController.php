@@ -13,10 +13,12 @@ class SubscribController
     private ?UserRepository $userRepository;
     private ?SubscribRepository $subscribRepository;
 
-    public function __construct(UserRepository $userRepository = null, SubscribRepository $subscribRepository= null)
+    public function __construct(
+        UserRepository $userRepository          = null,
+        SubscribRepository $subscribRepository  = null)
     {
-        $this->userRepository = $userRepository;
-        $this->subscribRepository = $subscribRepository;
+        $this->userRepository       = $userRepository;
+        $this->subscribRepository   = $subscribRepository;
     }
 
     public function addSubscription(Request $request, Response $response)

@@ -35,7 +35,7 @@ class Game
     protected string $moves;
 
     public function __construct(
-        User     $user_id,
+        User    $user_id,
         string  $white,
         string  $black,
         string  $winner,

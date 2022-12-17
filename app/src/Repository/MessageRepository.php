@@ -11,7 +11,6 @@ class MessageRepository extends EntityRepository
     {
         #persist сохранение в памяти, flush сохранение в бд
         $this->getEntityManager()->persist($entity);
-
         if ($flush) {
             $this->getEntityManager()->flush();
         }
@@ -24,5 +23,17 @@ class MessageRepository extends EntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    public function findArrayBy(int $idSend, int $idReceiver): array
+    {
+        return $this->createQueryBuilder('m')
+                ->andWhere('m.sender_user_id in (:sender, :receiver)')
+                ->andWhere('m.receiver_user_id in (:sender, :receiver)')
+                ->setParameter('sender', $idSend)
+                ->setParameter('receiver', $idReceiver)
+                ->orderBy('m.datetime', 'DESC')
+                ->getQuery()
+                ->getArrayResult();
     }
 }
