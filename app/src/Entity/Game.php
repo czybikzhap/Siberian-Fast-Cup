@@ -14,11 +14,11 @@ use Doctrine\ORM\Mapping\Table;
 #[Entity(repositoryClass: GameRepository::class), Table(name: 'games')]
 class Game
 {
-    #[Id, Column(type: 'integer'), GeneratedValue(strategy: 'AUTO')]
-    protected int $game_id;
+    #[Id, Column(name: 'game_id', type: 'integer'), GeneratedValue(strategy: 'AUTO')]
+    protected int $gameId;
     #[ManyToOne(targetEntity: User::class)]
     #[JoinColumn(name: 'user_id', referencedColumnName: 'id')]
-    private User $user_id;
+    private User $userId;
     #[Column(type: 'string', nullable: false)]
     protected string $white;
     #[Column(type: 'string', unique: true, nullable: false)]
@@ -35,16 +35,16 @@ class Game
     protected string $moves;
 
     public function __construct(
-        User    $user_id,
-        string  $white,
-        string  $black,
-        string  $winner,
-        int     $whiteElo,
-        int     $blackElo,
-        string  $speed,
-        string  $moves)
+        User   $userId,
+        string $white,
+        string $black,
+        string $winner,
+        int    $whiteElo,
+        int    $blackElo,
+        string $speed,
+        string $moves)
     {
-        $this->user_id  = $user_id;
+        $this->userId  = $userId;
         $this->white    = $white;
         $this->black    = $black;
         $this->winner   = $winner;
@@ -59,7 +59,7 @@ class Game
      */
     public function getGameId(): int
     {
-        return $this->game_id;
+        return $this->gameId;
     }
 
 
@@ -181,14 +181,14 @@ class Game
      */
     public function getUserId(): User
     {
-        return $this->user_id;
+        return $this->userId;
     }
 
     /**
-     * @param User $user_id
+     * @param User $userId
      */
-    public function setUserId(User $user_id): void
+    public function setUserId(User $userId): void
     {
-        $this->user_id = $user_id;
+        $this->userId = $userId;
     }
 }

@@ -8,7 +8,7 @@ use Slim\Psr7\Response;
 use App\Entity\User;
 use App\Repository\UserRepository;
 
-class UserController
+class UserController extends AutorizationController
 {
 
     private ?UserRepository $userRepository;
@@ -43,9 +43,6 @@ class UserController
         );
         $this->userRepository->add($user, true);
 
-        // диспатчер событий менеджер событий, генерация событий evon dispatcher
-
-        // Создание экземпляра класса, Вызвать метод и отправить необходимле сообщение, которое нужно поместить в очередь
         //$this->queueService->publishMessage($user->getEmail());
 
         $response->getBody()->write("Поздравляю, аккаунт создан!");
@@ -197,18 +194,7 @@ class UserController
 
     public function getInfo(Request $request, Response $response)
     {
-        if(!$request->hasHeader('Token'))
-        {
-            $response->getBody()->write("Not authorized");
-
-            return $response
-                ->withStatus(401);
-        }
-
-        $token = $request->getHeader( 'Token');
-        $token = reset($token);
-        $user = $this->userRepository->findOneByToken($token);
-
+        $user = $this->authorization($request, $this->userRepository);
         if(!empty($user))
         {
             $userInfo = json_encode($user->toArray());
@@ -217,7 +203,7 @@ class UserController
                 ->withStatus(200);
         }
 
-        $response->getBody()->write("Token entered incorrectly");
+        $response->getBody()->write("Token entered incorrectly or not authorized");
 
         return $response
             ->withStatus(422);
@@ -226,18 +212,7 @@ class UserController
 
     public function editIInfo(Request $request, Response $response)
     {
-        if(!$request->hasHeader('Token'))
-        {
-            $response->getBody()->write("Not authorized");
-
-            return $response
-                ->withStatus(401);
-        }
-
-        $token = $request->getHeader( 'Token');
-        $token = reset($token);
-
-        $user = $this->userRepository->findOneByToken($token);
+        $user = $this->authorization($request, $this->userRepository);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly");
@@ -430,18 +405,7 @@ class UserController
     //Delete user
     public function delete(Request $request, Response $response)
     {
-        if(!$request->hasHeader('Token'))
-        {
-            $response->getBody()->write("Not authorized");
-
-            return $response
-                ->withStatus(401);
-        }
-
-        $token = $request->getHeader( 'Token');
-        $token = reset($token);
-        $user = $this->userRepository->findOneByToken($token);
-
+        $user = $this->authorization($request, $this->userRepository);
         if(!empty($user))
         {
             $this->userRepository->delete($user);
@@ -457,19 +421,10 @@ class UserController
         }
     }
 
+    //Выход из профиля
     public function signOut(Request $request, Response $response)
     {
-        if(!$request->hasHeader('Token'))
-        {
-            $response->getBody()->write("Not authorized");
-
-            return $response
-                ->withStatus(401);
-        }
-
-        $token = $request->getHeader( 'Token');
-        $token = reset($token);
-        $user = $this->userRepository->findOneByToken($token);
+        $user = $this->authorization($request, $this->userRepository);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly");

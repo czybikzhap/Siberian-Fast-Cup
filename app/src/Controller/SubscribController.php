@@ -2,39 +2,28 @@
 
 namespace App\Controller;
 
-use App\Entity\Subscrib;
+use App\Entity\Subscribe;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 use App\Repository\UserRepository;
-use App\Repository\SubscribRepository;
+use App\Repository\SubscribeRepository;
 
-class SubscribController
+class SubscribController extends AutorizationController
 {
     private ?UserRepository $userRepository;
-    private ?SubscribRepository $subscribRepository;
+    private ?SubscribeRepository $subscribeRepository;
 
     public function __construct(
-        UserRepository $userRepository          = null,
-        SubscribRepository $subscribRepository  = null)
+        UserRepository      $userRepository          = null,
+        SubscribeRepository $subscribeRepository     = null)
     {
-        $this->userRepository       = $userRepository;
-        $this->subscribRepository   = $subscribRepository;
+        $this->userRepository           = $userRepository;
+        $this->subscribeRepository      = $subscribeRepository;
     }
 
     public function addSubscription(Request $request, Response $response)
     {
-        if(!$request->hasHeader('Token'))
-        {
-            $response->getBody()->write("Not authorized");
-
-            return $response
-                ->withStatus(401);
-        }
-
-        $token = $request->getHeader( 'Token');
-        $token = reset($token);
-
-        $user = $this->userRepository->findOneByToken($token);
+        $user = $this->authorization($request, $this->userRepository);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly");
@@ -43,50 +32,25 @@ class SubscribController
                 ->withStatus(422);
         }
 
-        $params = json_decode($request->getBody()->getContents(), true);
-        if (array_key_exists ('follower_id', $params))
+        $rightUser = $this->hasReceiver($request, $this->userRepository);
+        if($rightUser === null)
         {
-            if(empty($params['follower_id']))
-            {
-                $response->getBody()->write("follower_id not be empty or null");
-                return $response
-                    ->withStatus(422);
-            }
-        }else{
-            $response->getBody()->write("follower_id not use");
-            return $response
-                ->withStatus(400);
-        }
-
-        $rightuser = $this->userRepository->find($params['follower_id']);
-        if($rightuser === null)
-        {
-            $response->getBody()->write("User not found");
+            $response->getBody()->write("follower_id not use or not empty, user not found");
             return $response
                 ->withStatus(422);
         }
 
-        $subscrib = new Subscrib($user, $rightuser);
-        $this->subscribRepository->add($subscrib, true);
+        $subscribe = new Subscribe($user, $rightUser);
+        $this->subscribeRepository->add($subscribe, true);
 
-        $response->getBody()->write("Поздравляем друг добавлен!");
+        $response->getBody()->write("Поздравляем, друг добавлен!");
         return $response
             ->withStatus(201);
     }
 
     public function deleteSubscription(Request $request, Response $response)
     {
-        if(!$request->hasHeader('Token'))
-        {
-            $response->getBody()->write("Not authorized");
-
-            return $response
-                ->withStatus(401);
-        }
-
-        $token = $request->getHeader( 'Token');
-        $token = reset($token);
-        $user = $this->userRepository->findOneByToken($token);
+        $user = $this->authorization($request, $this->userRepository);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly");
@@ -95,51 +59,26 @@ class SubscribController
                 ->withStatus(422);
         }
 
-        $params = json_decode($request->getBody()->getContents(), true);
-        if (array_key_exists ('follower_id', $params))
+        $rightUser = $this->hasReceiver($request, $this->userRepository);
+        if($rightUser === null)
         {
-            if(empty($params['follower_id']))
-            {
-                $response->getBody()->write("id_follower not be empty or null");
-                return $response
-                    ->withStatus(400);
-            }
-        }else{
-            $response->getBody()->write("id_follower not use");
-            return $response
-                ->withStatus(400);
-        }
-
-        $rightuser = $this->userRepository->find($params['follower_id']);
-        if($rightuser === null)
-        {
-            $response->getBody()->write("User not found");
-
+            $response->getBody()->write("follower_id not use or not empty, user not found");
             return $response
                 ->withStatus(422);
         }
 
-        $subscrib = $this->subscribRepository->findOneByFollower($user->getId(), $rightuser->getId());
-        $this->subscribRepository->delete($subscrib, true);
+        $subscribe = $this->subscribeRepository->findOneByFollower($user->getId(), $rightUser->getId());
+        $this->subscribeRepository->delete($subscribe, true);
 
         $response->getBody()->write("Вы отписались!");
         return $response
             ->withStatus(201);
     }
+
     //Подписчики
     public function showSubscribers(Request $request, Response $response)
     {
-        if(!$request->hasHeader('Token'))
-        {
-            $response->getBody()->write("Not authorized");
-
-            return $response
-                ->withStatus(401);
-        }
-
-        $token = $request->getHeader( 'Token');
-        $token = reset($token);
-        $user = $this->userRepository->findOneByToken($token);
+        $user = $this->authorization($request, $this->userRepository);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly");
@@ -156,7 +95,7 @@ class SubscribController
         {
             $params[] = $subscriber->getLeftUser()->toArray();
         }
-        var_dump($params);
+
         $response->getBody()->write(json_encode($params));
         return $response
             ->withStatus(201);
@@ -165,17 +104,7 @@ class SubscribController
     //Подписки
     public function showSubscriptions(Request $request, Response $response)
     {
-        if(!$request->hasHeader('Token'))
-        {
-            $response->getBody()->write("Not authorized");
-
-            return $response
-                ->withStatus(401);
-        }
-
-        $token = $request->getHeader( 'Token');
-        $token = reset($token);
-        $user = $this->userRepository->findOneByToken($token);
+        $user = $this->authorization($request, $this->userRepository);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly");

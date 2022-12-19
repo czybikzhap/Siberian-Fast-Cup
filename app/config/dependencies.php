@@ -1,16 +1,18 @@
 <?php
 
+use App\Controller\AutorizationController;
 use App\Controller\GameController;
 use App\Controller\MessageController;
 use App\Controller\SubscribController;
 use App\Controller\UserController;
 use App\Entity\Game;
 use App\Entity\Message;
-use App\Entity\Subscrib;
+use App\Entity\Subscribe;
 use App\Entity\User;
 use App\Repository\GameRepository;
+use App\Repository\messageHistoryRepository;
 use App\Repository\MessageRepository;
-use App\Repository\SubscribRepository;
+use App\Repository\SubscribeRepository;
 use App\Repository\UserRepository;
 use App\Service\LiClient;
 use App\Service\QueueService;
@@ -48,8 +50,8 @@ return [
         /** @var UserRepository $userRepository */
         $userRepository = $entityManager->getRepository(User::class);
 
-        /** @var SubscribRepository $subscribRepository */
-        $subscribRepository = $entityManager->getRepository(Subscrib::class);
+        /** @var SubscribeRepository $subscribRepository */
+        $subscribRepository = $entityManager->getRepository(Subscribe::class);
 
         $connection = $entityManager->getConnection();
         return new SubscribController($userRepository, $subscribRepository, $connection);
@@ -96,7 +98,10 @@ return [
         /** @var MessageRepository $messageRepository */
         $messageRepository = $entityManager->getRepository(Message::class);
 
-        return new MessageController($userRepository, $messageRepository);
+        /** @var messageHistoryRepository $messageRepository */
+        $messageHistoryRepository = $entityManager->getRepository(Message::class);
+
+        return new MessageController($userRepository, $messageRepository, $messageHistoryRepository);
     },
 
     QueueService::class => function(){
