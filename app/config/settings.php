@@ -10,7 +10,7 @@ return [
             'host' => 'db',
             'password' => getenv('DB_PASSWORD') ?: "dbpwd"
         ],
-        //TODO 'password' => getenv('DB_PASSWORD') ?: "dbpwd" add in docktrine
+
         'doctrine' => [
             'dev_mode' => true,
             'cache_dir' => APP_ROOT . '/var/doctrine',

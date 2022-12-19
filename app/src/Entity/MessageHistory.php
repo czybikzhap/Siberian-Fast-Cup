@@ -1,19 +1,19 @@
 <?php
 
 namespace App\Entity;
-
 use App\Repository\MessageRepository;
+use DateTime;
 use Doctrine\ORM\Mapping\Column;
-use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\Table;
-use DateTime;
 
 #[Entity(repositoryClass: MessageRepository::class), Table(name: 'messages')]
-class Message{
+class MessageHistory
+{
     #[Id, Column(name: 'messages_id', type: 'integer'), GeneratedValue(strategy: 'AUTO')]
     protected int $messagesId;
     #[Column(name: 'messages_text', type: 'string')]
@@ -35,21 +35,13 @@ class Message{
         User     $receiverUserId,
         string   $status,
         DateTime $dateTime
-        )
+    )
     {
         $this->messagesText     = $messagesText;
         $this->senderUserId     = $senderUserId;
         $this->receiverUserId   = $receiverUserId;
         $this->status           = $status;
         $this->dateTime         = $dateTime;
-    }
-
-    /**
-     * @return int
-     */
-    public function getMessagesId(): int
-    {
-        return $this->messagesId;
     }
 
     /**

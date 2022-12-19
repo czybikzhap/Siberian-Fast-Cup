@@ -15,11 +15,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 class User{
     #[Id, Column(type: 'integer'), GeneratedValue(strategy: 'AUTO')]
     protected int $id;
-    #[Column(type: 'string', nullable: false)]
+    #[Column(name: 'last_name', type: 'string', nullable: false)]
     protected string $lastName;
-    #[Column(type: 'string', nullable: false)]
+    #[Column(name: 'first_name', type: 'string', nullable: false)]
     protected ?string $firstName;
-    #[Column(type: 'string', nullable: false)]
+    #[Column(name: 'second_name', type: 'string', nullable: false)]
     protected ?string $secondName;
     #[Column(type: 'string', unique: true, nullable: false)]
     protected string $email;
@@ -31,11 +31,11 @@ class User{
     protected ?int $age;
     #[Column(type: 'string', unique: true, nullable: false)]
     protected ?string $token;
-    #[Column(type: 'string', unique: true, nullable: false)]
-    protected ?string $lichess_name;
-    #[OneToMany( mappedBy: 'leftUser', targetEntity: Subscrib::class)]
+    #[Column(name: 'li_chess_name', type: 'string', unique: true, nullable: false)]
+    protected ?string $liChessName;
+    #[OneToMany( mappedBy: 'leftUser', targetEntity: Subscribe::class)]
     private Collection $subscriptions;
-    #[OneToMany( mappedBy: 'rightUser', targetEntity: Subscrib::class)]
+    #[OneToMany( mappedBy: 'rightUser', targetEntity: Subscribe::class)]
     private Collection $subscribers;
     #[OneToMany( mappedBy: 'user_id', targetEntity: Game::class)]
     private Collection $games;
@@ -163,7 +163,7 @@ class User{
     }
 
     /**
-     * @return Collection<int, Subscrib>
+     * @return Collection<int, Subscribe>
      */
 
     public function getSubscribers(): Collection
@@ -172,7 +172,7 @@ class User{
     }
 
     /**
-     * @return Collection<int, Subscrib>
+     * @return Collection<int, Subscribe>
      */
     public function getSubscriptions(): Collection
     {
@@ -184,15 +184,15 @@ class User{
      */
     public function getLichessname(): ?string
     {
-        return $this->lichess_name;
+        return $this->liChessName;
     }
 
     /**
-     * @param string|null $lichess_name
+     * @param string|null $liChessName
      */
-    public function setLichessname(?string $lichess_name): void
+    public function setLichessname(?string $liChessName): void
     {
-        $this->lichess_name = $lichess_name;
+        $this->liChessName = $liChessName;
     }
 
     /**

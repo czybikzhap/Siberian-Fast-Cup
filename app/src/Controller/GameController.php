@@ -10,7 +10,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
-class GameController
+class GameController extends AutorizationController
 {
     //to do
     private UserRepository $userRepository;
@@ -29,20 +29,7 @@ class GameController
      */
     public function showGame(Request $request, Response $response)
     {
-        if(!$request->hasHeader('Token'))
-        {
-            $response->getBody()->write("Not authorized");
-
-            return $response
-                ->withStatus(401);
-        }
-
-        $token = $request->getHeader( 'Token');
-        $token = reset($token);
-
-        //проверка на наличие токена
-
-        $user = $this->userRepository->findOneByToken($token);
+        $user = $this->authorization($request, $this->userRepository);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly");

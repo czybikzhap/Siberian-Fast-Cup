@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\SubscribRepository;
+use App\Repository\SubscribeRepository;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
@@ -11,8 +11,8 @@ use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\Table;
 
-#[Entity(repositoryClass: SubscribRepository::class), Table(name: 'subscrib')]
-class Subscrib
+#[Entity(repositoryClass: SubscribeRepository::class), Table(name: 'subscribe')]
+class Subscribe
 {
     #[Id, Column(type: 'integer'), GeneratedValue(strategy: 'AUTO')]
     protected int $id;
