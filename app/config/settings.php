@@ -24,6 +24,13 @@ return [
                 'password' => 'dbpwd',
                 'charset' => 'utf-8'
             ]
+        ],
+        'rabbitmq' => [
+            'host' => 'rabbitmq',
+            'port' => 5672,
+            'user' => 'rabbitmq',
+            'password' => 'rabbitmq'
         ]
+
     ]
 ];

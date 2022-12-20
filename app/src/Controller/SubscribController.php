@@ -32,7 +32,7 @@ class SubscribController extends AutorizationController
                 ->withStatus(422);
         }
 
-        $rightUser = $this->hasReceiver($request, $this->userRepository);
+        $rightUser = $this->hasFollower($request, $this->userRepository);
         if($rightUser === null)
         {
             $response->getBody()->write("follower_id not use or not empty, user not found");
@@ -59,7 +59,7 @@ class SubscribController extends AutorizationController
                 ->withStatus(422);
         }
 
-        $rightUser = $this->hasReceiver($request, $this->userRepository);
+        $rightUser = $this->hasFollower($request, $this->userRepository);
         if($rightUser === null)
         {
             $response->getBody()->write("follower_id not use or not empty, user not found");

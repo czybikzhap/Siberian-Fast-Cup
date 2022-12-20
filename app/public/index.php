@@ -1,7 +1,6 @@
 <?php
 
 use App\Controller\UserController;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
 use Slim\Factory\AppFactory;
 use UMA\DIC\Container;
 
