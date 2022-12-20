@@ -9,11 +9,15 @@ use PhpAmqpLib\Message\AMQPMessage;
 class QueueService
 {
     function publishMessage(string $text){
+//        $connection = new AMQPStreamConnection(
+//            'rabbitmq',
+//            5672,
+//            'rabbitmq',
+//            'rabbitmq'
+//        );
+
         $connection = new AMQPStreamConnection(
-            'rabbitmq',
-            5672,
-            'rabbitmq',
-            'rabbitmq'
+
         );
         $channel = $connection->channel();
 

@@ -28,6 +28,7 @@ return [
         $logger->pushHandler($file_handle);
         return $logger;
     },
+    //TODO отсюда нода взять $pdo и принимать при транзакции
     'db' => function (Container $c) {
         $db = $c->get('settings')['db'];
         $dsn = "pgsql:host={$db['host']};port=5432;dbname={$db['name']};";
@@ -101,7 +102,9 @@ return [
         /** @var messageHistoryRepository $messageRepository */
         $messageHistoryRepository = $entityManager->getRepository(Message::class);
 
-        return new MessageController($userRepository, $messageRepository, $messageHistoryRepository);
+        $connection = $entityManager->getConnection();
+
+        return new MessageController($userRepository, $messageRepository, $messageHistoryRepository, $connection);
     },
 
     QueueService::class => function(){

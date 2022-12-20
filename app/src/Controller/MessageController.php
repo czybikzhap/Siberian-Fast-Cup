@@ -7,6 +7,8 @@ use App\Entity\MessageHistory;
 use App\Repository\messageHistoryRepository;
 use App\Repository\MessageRepository;
 use App\Repository\UserRepository;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 use DateTime;
@@ -16,14 +18,19 @@ class MessageController extends AutorizationController
     private UserRepository $userRepository;
     private MessageRepository $messageRepository;
     private MessageHistoryRepository $messageHistoryRepository;
+    private Connection $connection;
 
-    public function __construct(UserRepository $userRepository, MessageRepository $messageRepository, MessageHistoryRepository $messageHistoryRepository)
+    public function __construct(UserRepository $userRepository, MessageRepository $messageRepository, MessageHistoryRepository $messageHistoryRepository, Connection $connection)
     {
         $this->userRepository           = $userRepository;
         $this->messageRepository        = $messageRepository;
         $this->messageHistoryRepository = $messageHistoryRepository;
+        $this->connection               = $connection;
     }
 
+    /**
+     * @throws Exception
+     */
     public function sendMessage(Request $request, Response $response)
     {
         $user = $this->authorization($request, $this->userRepository);
@@ -69,8 +76,22 @@ class MessageController extends AutorizationController
         );
 
         //TODO Транзакцию добавить
-        $this->messageRepository->add($message, true);
-        $this->messageHistoryRepository->add($messageHistory, true);
+        try {
+            $db = $this->connection;
+        } catch (Exception $e) {
+            die("Не удалось подключиться: " . $e->getMessage());
+        }
+
+        try{
+            $db->beginTransaction();
+            $this->messageRepository->add($message, true);
+            $this->messageHistoryRepository->add($messageHistory, true);
+            $db->commit();
+        } catch (Exception $e){
+            $db->rollBack();
+            echo "Ошибка: " . $e->getMessage();
+        }
+
 
         $response->getBody()->write("Сообщение отправленно успешно!");
         return $response
