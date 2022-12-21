@@ -11,7 +11,6 @@ try {
     /** @var QueueService $queueService */
     $queueService = $container->get(QueueService::class);
     $queueService->receiverMessage();
-    echo "все успешно! Жду сообщения";
 }catch (Exception $exception){
-    echo "$exception";
+    print_r($exception->getMessage());
 }
