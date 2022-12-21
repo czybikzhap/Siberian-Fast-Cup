@@ -55,11 +55,7 @@ class QueueService
             foreach ($msg->get_properties() as $property)
                 switch ($property){
                     case 'email':
-                        try{
-                            EmailConsumer::sendToEmail($msg->body);
-                        }catch (\Exception $exception){
-                            return $exception;
-                        }
+                        EmailConsumer::sendToEmail($msg->body);
                         break;
                 }
         };

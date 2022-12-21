@@ -99,7 +99,7 @@ return [
         /** @var MessageRepository $messageRepository */
         $messageRepository = $entityManager->getRepository(Message::class);
 
-        /** @var MessageHistoryRepository $messageRepository */
+        /** @var MessageHistoryRepository $messageHistoryRepository */
         $messageHistoryRepository = $entityManager->getRepository(MessageHistory::class);
 
         $connection = $entityManager->getConnection();
