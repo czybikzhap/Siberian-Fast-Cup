@@ -62,8 +62,6 @@ class Game
         return $this->gameId;
     }
 
-
-
     /**
      * @return string
      */

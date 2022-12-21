@@ -2,7 +2,7 @@
 
 use App\Controller\GameController;
 use App\Controller\MessageController;
-use App\Controller\SubscribController;
+use App\Controller\SubscribeController;
 use App\Controller\UserController;
 use Slim\App;
 use Slim\Psr7\Request;
@@ -40,13 +40,13 @@ return function (App $app) {
 
     $app->group('/sub', function (RouteCollectorProxy $group){
         //подписаться на пользователя (добавить подписку на пользователя)
-        $group->post('/subscriptionAdd', [SubscribController::class, "addSubscription"]);
+        $group->post('/subscriptionAdd', [SubscribeController::class, "addSubscription"]);
         //отписаться от пользователя (удалить подписку)
-        $group->post('/subscriptionDelete', [SubscribController::class, "deleteSubscription"]);
+        $group->post('/subscriptionDelete', [SubscribeController::class, "deleteSubscription"]);
         //список подписчиков
-        $group->get('/subscribersShow', [SubscribController::class, "showSubscribers"]);
+        $group->get('/subscribersShow', [SubscribeController::class, "showSubscribers"]);
         //список подписок
-        $group->get('/subscriptionsShow', [SubscribController::class, "showSubscriptions"]);
+        $group->get('/subscriptionsShow', [SubscribeController::class, "showSubscriptions"]);
     });
 
     //список партий

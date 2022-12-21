@@ -7,10 +7,10 @@ use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Controller\WithAuthorizationController;
 
-class UserController extends AutorizationController
+class UserController extends WithAuthorizationController
 {
-
     private ?UserRepository $userRepository;
     private ?QueueService $queueService;
     public function __construct(UserRepository $userRepository = null, QueueService $queueService = null)
@@ -25,7 +25,8 @@ class UserController extends AutorizationController
         $params = json_decode($request->getBody()->getContents(), true);
         $errors = $this->validateSignUp($params);
 
-        if (!empty($errors)) {
+        if (!empty($errors))
+        {
             $newStr = json_encode($errors);
             $response->getBody()->write($newStr);
             return $response
@@ -43,7 +44,13 @@ class UserController extends AutorizationController
         );
         $this->userRepository->add($user, true);
 
-        //$this->queueService->publishMessage($user->getEmail());
+        try {
+            $this->queueService->publishMessage($user->getEmail());
+        } catch (\Exception $e){
+            $response->getBody()->write($e);
+            return $response
+                ->withStatus(422);
+        }
 
         $response->getBody()->write("Поздравляю, аккаунт создан!");
         return $response->withStatus(201);
@@ -77,7 +84,8 @@ class UserController extends AutorizationController
     private function validateLastname(array $params): ?string
     {
         $messages = null;
-        if(empty($params['lastName'])){
+        if(empty($params['lastName']))
+        {
            $messages = 'Lastname not be empty';
         }
         return $messages;
@@ -86,7 +94,8 @@ class UserController extends AutorizationController
     private function validatePassword(array $params): ?string
     {
         $messages = null;
-        if(empty($params['password'])){
+        if(empty($params['password']))
+        {
             $messages = 'Password not be empty';
         }
 
@@ -97,14 +106,19 @@ class UserController extends AutorizationController
     {
         $messages = null;
 
-        if(empty($params['email'])) {
+        if(empty($params['email']))
+        {
             $messages = "Email not be empty or null!";
-        } else {
-            if(!filter_var($params['email'], FILTER_VALIDATE_EMAIL)){
+        }
+        else {
+            if(!filter_var($params['email'], FILTER_VALIDATE_EMAIL))
+            {
                 $messages = "The email address specified is not correct";
-            }else {
+            }
+            else {
                 $userFindEmail = $this->userRepository->findOneByEmail($params['email']);
-                if ($userFindEmail instanceof User) {
+                if ($userFindEmail instanceof User)
+                {
                     $messages = "User with the same email already exists";
                 }
             }
@@ -119,7 +133,8 @@ class UserController extends AutorizationController
 
         $errorsLogin = $this->validateSignIn($params);
 
-        if (!empty($errorsLogin)) {
+        if (!empty($errorsLogin))
+        {
             $newStr = json_encode($errorsLogin);
             $response->getBody()->write($newStr);
             return $response
@@ -130,28 +145,33 @@ class UserController extends AutorizationController
         $password = $params['password'];
 
         $user = $this->userRepository->findOneByEmail($login);
-        if($user instanceof User) {
+        if($user instanceof User)
+        {
             $result = password_verify($password, $user->getPassword());
-            if($result) {
+            if($result)
+            {
                 $response->getBody()->write("Вы успешно зашли в систему");
                 if(empty($user->getToken()))
                 {
                     $token = Uuid::uuid4()->toString();
                     $user->setToken($token);
                     $this->userRepository->add($user, true);
-                }else{
+                }
+                else {
                     $token = $user->getToken();
                 }
 
                 return $response
                     ->withStatus(200)
                     ->withHeader('Token', $token);
-            }else {
+            }
+            else {
                 $response->getBody()->write("Password entered incorrectly");
                 return $response
                     ->withStatus(422);
             }
-        } else {
+        }
+        else {
             $response->getBody()->write("Login entered incorrectly");
 
             return $response
@@ -182,10 +202,13 @@ class UserController extends AutorizationController
     {
         $messages = null;
 
-        if(empty($params['login'])) {
+        if(empty($params['login']))
+        {
             $messages = "Login not be empty or null!";
-        } else {
-            if(!filter_var($params['login'], FILTER_VALIDATE_EMAIL)){
+        } else
+        {
+            if(!filter_var($params['login'], FILTER_VALIDATE_EMAIL))
+            {
                 $messages = "The email address specified is not correct";
             }
         }
@@ -194,7 +217,7 @@ class UserController extends AutorizationController
 
     public function getInfo(Request $request, Response $response)
     {
-        $user = $this->authorization($request, $this->userRepository);
+        $user = $this->authorization($request);
         if(!empty($user))
         {
             $userInfo = json_encode($user->toArray());
@@ -212,7 +235,7 @@ class UserController extends AutorizationController
 
     public function editIInfo(Request $request, Response $response)
     {
-        $user = $this->authorization($request, $this->userRepository);
+        $user = $this->authorization($request);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly");
@@ -232,7 +255,8 @@ class UserController extends AutorizationController
         if (array_key_exists ('lastName', $params))
         {
             $errors = $this->validateLastname($params);
-            if (!empty($errors)) {
+            if (!empty($errors))
+            {
                 $newStr = json_encode($errors);
                 $response->getBody()->write($newStr);
                 return $response
@@ -247,7 +271,8 @@ class UserController extends AutorizationController
         if (array_key_exists ('firstName', $params))
         {
             $errors = $this->validateFirstname($params);
-            if (!empty($errors)) {
+            if (!empty($errors))
+            {
                 $newStr = json_encode($errors);
                 $response->getBody()->write($newStr);
                 return $response
@@ -262,7 +287,8 @@ class UserController extends AutorizationController
         if (array_key_exists ('secondName', $params))
         {
             $errors = $this->validateSecondname($params);
-            if (!empty($errors)) {
+            if (!empty($errors))
+            {
                 $newStr = json_encode($errors);
                 $response->getBody()->write($newStr);
                 return $response
@@ -277,7 +303,8 @@ class UserController extends AutorizationController
         if (array_key_exists ('email', $params))
         {
             $errors = $this->validateEmail($params);
-            if (!empty($errors)) {
+            if (!empty($errors))
+            {
                 $newStr = json_encode($errors);
                 $response->getBody()->write($newStr);
                 return $response
@@ -293,14 +320,16 @@ class UserController extends AutorizationController
         if (array_key_exists ('phone', $params))
         {
             $errors = $this->validatePhone($params);
-            if (!empty($errors)) {
+            if (!empty($errors))
+            {
                 $newStr = json_encode($errors);
                 $response->getBody()->write($newStr);
                 return $response
                     ->withStatus(422);
             }
 
-            if ($user->getPhone() !== $params['phone']) {
+            if ($user->getPhone() !== $params['phone'])
+            {
                 $user->setPhone($params['phone']);
             }
         }
@@ -308,14 +337,16 @@ class UserController extends AutorizationController
         if (array_key_exists ('age', $params))
         {
             $errors = $this->validateAge($params);
-            if (!empty($errors)) {
+            if (!empty($errors))
+            {
                 $newStr = json_encode($errors);
                 $response->getBody()->write($newStr);
                 return $response
                     ->withStatus(422);
             }
 
-            if ($user->getAge() !== $params['age']) {
+            if ($user->getAge() !== $params['age'])
+            {
                 $user->setAge($params['age']);
             }
         }
@@ -323,14 +354,16 @@ class UserController extends AutorizationController
         if (array_key_exists ('password', $params))
         {
             $errors = $this->validatePassword($params);
-            if (!empty($errors)) {
+            if (!empty($errors))
+            {
                 $newStr = json_encode($errors);
                 $response->getBody()->write($newStr);
                 return $response
                     ->withStatus(422);
             }
 
-            if ($user->getPassword() !== $params['password']) {
+            if ($user->getPassword() !== $params['password'])
+            {
                 $user->setPassword($params['password']);
             }
         }
@@ -338,23 +371,23 @@ class UserController extends AutorizationController
         if (array_key_exists ('liChessName', $params))
         {
             $errors = $this->validateLiChessName($params);
-            if (!empty($errors)) {
+            if (!empty($errors))
+            {
                 $newStr = json_encode($errors);
                 $response->getBody()->write($newStr);
                 return $response
                     ->withStatus(422);
             }
 
-            if ($user->getLichessname() !== $params['liChessName']) {
+            if ($user->getLichessname() !== $params['liChessName'])
+            {
                 $user->setLichessname($params['liChessName']);
             }
         }
 
         $this->userRepository->add($user, true);
-
         return $response
             ->withStatus(201);
-
     }
 
     private function validateFirstname(array $params): ?string
@@ -405,7 +438,7 @@ class UserController extends AutorizationController
     //Delete user
     public function delete(Request $request, Response $response)
     {
-        $user = $this->authorization($request, $this->userRepository);
+        $user = $this->authorization($request);
         if(!empty($user))
         {
             $this->userRepository->delete($user);
@@ -424,7 +457,7 @@ class UserController extends AutorizationController
     //Выход из профиля
     public function signOut(Request $request, Response $response)
     {
-        $user = $this->authorization($request, $this->userRepository);
+        $user = $this->authorization($request);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly");
@@ -439,5 +472,10 @@ class UserController extends AutorizationController
 
         return $response
             ->withStatus(201);
+    }
+
+    protected function getUserRepository(): UserRepository
+    {
+        return $this->userRepository;
     }
 }

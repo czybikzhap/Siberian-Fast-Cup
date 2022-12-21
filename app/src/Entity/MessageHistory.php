@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Entity;
-use App\Repository\MessageRepository;
+use App\Repository\MessageHistoryRepository;
 use DateTime;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\Table;
 
-#[Entity(repositoryClass: MessageRepository::class), Table(name: 'messages')]
+#[Entity(repositoryClass: MessageHistoryRepository::class), Table(name: 'messages_history')]
 class MessageHistory
 {
     #[Id, Column(name: 'messages_id', type: 'integer'), GeneratedValue(strategy: 'AUTO')]
@@ -30,11 +30,11 @@ class MessageHistory
     protected DateTime $dateTime;
 
     public function __construct(
-        string   $messagesText,
-        User     $senderUserId,
-        User     $receiverUserId,
-        string   $status,
-        DateTime $dateTime
+        string   $messagesText = null,
+        User     $senderUserId = null,
+        User     $receiverUserId = null,
+        string   $status = null,
+        DateTime $dateTime = null
     )
     {
         $this->messagesText     = $messagesText;

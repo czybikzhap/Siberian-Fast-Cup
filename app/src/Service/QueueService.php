@@ -8,17 +8,16 @@ use PhpAmqpLib\Message\AMQPMessage;
 
 class QueueService
 {
-    function publishMessage(string $text){
-//        $connection = new AMQPStreamConnection(
-//            'rabbitmq',
-//            5672,
-//            'rabbitmq',
-//            'rabbitmq'
-//        );
+    private AMQPStreamConnection $AMQPStreamConnection;
+    public function __construct(AMQPStreamConnection $AMQPStreamConnection)
+    {
+        $this->AMQPStreamConnection = $AMQPStreamConnection;
+    }
 
-        $connection = new AMQPStreamConnection(
+    public function publishMessage(string $text): void
+    {
 
-        );
+        $connection = $this->AMQPStreamConnection->getConnection();
         $channel = $connection->channel();
 
         $channel->queue_declare(
@@ -34,19 +33,14 @@ class QueueService
 
         $channel->basic_publish($message,'','email');
 
-        echo " [x] Sent email\n";
-
         $channel->close();
         $connection->close();
     }
 
-    static function receiverMessage(){
-        $connection = new AMQPStreamConnection(
-            'rabbitmq',
-            5672,
-            'rabbitmq',
-            'rabbitmq'
-        );
+    public function receiverMessage(): void
+    {
+
+        $connection = $this->AMQPStreamConnection->getConnection();
         $channel = $connection->channel();
 
         $channel->queue_declare(
@@ -57,15 +51,15 @@ class QueueService
             false
         );
 
-        echo " [*] Waiting for messages. To exit press CTRL+C\n";
-
         $callback = function (AMQPMessage $msg){
-            echo ' [x] Received ', $msg->body, "\n";
-            print_r($msg->get_properties());
             foreach ($msg->get_properties() as $property)
                 switch ($property){
                     case 'email':
-                        EmailConsumer::sendToEmail($msg->body);
+                        try{
+                            EmailConsumer::sendToEmail($msg->body);
+                        }catch (\Exception $exception){
+                            return $exception;
+                        }
                         break;
                 }
         };

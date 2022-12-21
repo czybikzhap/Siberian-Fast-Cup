@@ -8,7 +8,8 @@ use PHPMailer\PHPMailer\SMTP;
 
 class EmailConsumer
 {
-    public static function sendToEmail(string $email){
+    public static function sendToEmail(string $email): ?string
+    {
         $mail = new PHPMailer(true);
         try {
             //Server settings
@@ -26,14 +27,13 @@ class EmailConsumer
 
             //Content
             $mail->isHTML(true);
-            $mail->Subject = 'lheujt fdvhdfv';
-            $mail->Body = 'ssssssssssssssssssssssss';
+            $mail->Subject = 'Регистрация в сервисе ChessBase';
+            $mail->Body = 'Привет дорогой пользователь, очень рады что вы зарегистрировались на нашем сервисе. Приятного пользования!';
 
             $mail->send();
-            echo 'Message has been sent';
-
         } catch (Exception $e) {
-            echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+            return "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
         }
+        return null;
     }
 }

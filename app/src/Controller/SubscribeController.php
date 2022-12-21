@@ -3,12 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Subscribe;
+use App\Entity\User;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 use App\Repository\UserRepository;
 use App\Repository\SubscribeRepository;
 
-class SubscribController extends AutorizationController
+class SubscribeController extends WithAuthorizationController
 {
     private ?UserRepository $userRepository;
     private ?SubscribeRepository $subscribeRepository;
@@ -23,7 +24,7 @@ class SubscribController extends AutorizationController
 
     public function addSubscription(Request $request, Response $response)
     {
-        $user = $this->authorization($request, $this->userRepository);
+        $user = $this->authorization($request);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly");
@@ -50,7 +51,7 @@ class SubscribController extends AutorizationController
 
     public function deleteSubscription(Request $request, Response $response)
     {
-        $user = $this->authorization($request, $this->userRepository);
+        $user = $this->authorization($request);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly");
@@ -78,7 +79,7 @@ class SubscribController extends AutorizationController
     //Подписчики
     public function showSubscribers(Request $request, Response $response)
     {
-        $user = $this->authorization($request, $this->userRepository);
+        $user = $this->authorization($request);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly");
@@ -104,7 +105,7 @@ class SubscribController extends AutorizationController
     //Подписки
     public function showSubscriptions(Request $request, Response $response)
     {
-        $user = $this->authorization($request, $this->userRepository);
+        $user = $this->authorization($request);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly");
@@ -123,5 +124,26 @@ class SubscribController extends AutorizationController
         $response->getBody()->write(json_encode($params));
         return $response
             ->withStatus(201);
+    }
+
+    public function hasFollower(Request $request, UserRepository $userRepository): ?User
+    {
+
+        $params = json_decode($request->getBody()->getContents(), true);
+
+        if (array_key_exists ('follower_id', $params))
+        {
+            if(!empty($params['follower_id']))
+            {
+                return $userRepository->find($params['follower_id']);
+            }
+            return null;
+        }
+        return null;
+    }
+
+    protected function getUserRepository(): UserRepository
+    {
+        return $this->userRepository;
     }
 }

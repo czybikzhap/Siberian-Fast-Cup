@@ -25,6 +25,7 @@ return [
                 'charset' => 'utf-8'
             ]
         ],
+
         'rabbitmq' => [
             'host' => 'rabbitmq',
             'port' => 5672,
