@@ -4,7 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Message;
 use App\Entity\MessageHistory;
-use App\Repository\messageHistoryRepository;
+use App\Entity\User;
+use App\Repository\MessageHistoryRepository;
 use App\Repository\MessageRepository;
 use App\Repository\UserRepository;
 use Doctrine\DBAL\Connection;
@@ -13,14 +14,18 @@ use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 use DateTime;
 
-class MessageController extends AutorizationController
+class MessageController extends WithAuthorizationController
 {
     private UserRepository $userRepository;
     private MessageRepository $messageRepository;
     private MessageHistoryRepository $messageHistoryRepository;
     private Connection $connection;
 
-    public function __construct(UserRepository $userRepository, MessageRepository $messageRepository, MessageHistoryRepository $messageHistoryRepository, Connection $connection)
+    public function __construct(
+        UserRepository $userRepository,
+        MessageRepository $messageRepository,
+        MessageHistoryRepository $messageHistoryRepository,
+        Connection $connection)
     {
         $this->userRepository           = $userRepository;
         $this->messageRepository        = $messageRepository;
@@ -33,7 +38,7 @@ class MessageController extends AutorizationController
      */
     public function sendMessage(Request $request, Response $response)
     {
-        $user = $this->authorization($request, $this->userRepository);
+        $user = $this->authorization($request);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly or not empty, user not found");
@@ -75,23 +80,15 @@ class MessageController extends AutorizationController
             $dataSend
         );
 
-        //TODO Транзакцию добавить
         try {
-            $db = $this->connection;
-        } catch (Exception $e) {
-            die("Не удалось подключиться: " . $e->getMessage());
-        }
-
-        try{
-            $db->beginTransaction();
+            $this->connection->beginTransaction();
             $this->messageRepository->add($message, true);
             $this->messageHistoryRepository->add($messageHistory, true);
-            $db->commit();
+            $this->connection->commit();
         } catch (Exception $e){
-            $db->rollBack();
+            $this->connection->rollBack();
             echo "Ошибка: " . $e->getMessage();
         }
-
 
         $response->getBody()->write("Сообщение отправленно успешно!");
         return $response
@@ -100,7 +97,7 @@ class MessageController extends AutorizationController
 
     public function getMessages(Request $request, Response $response)
     {
-        $user = $this->authorization($request, $this->userRepository);
+        $user = $this->authorization($request);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly or not empty, user not found");
@@ -121,5 +118,41 @@ class MessageController extends AutorizationController
         $response->getBody()->write(json_encode($message));
         return $response
             ->withStatus(200);
+    }
+
+    public function hasReceiver(Request $request, UserRepository $userRepository): ?User
+    {
+
+        $params = json_decode($request->getBody()->getContents(), true);
+
+        if (array_key_exists ('receiver_user_id', $params))
+        {
+            if(!empty($params['receiver_user_id']))
+            {
+                return $userRepository->find($params['receiver_user_id']);
+            }
+            return null;
+        }
+        return null;
+    }
+
+    public function hasMessageText(Request $request): ?string
+    {
+
+        $params = json_decode($request->getBody()->getContents(), true);
+
+        if (array_key_exists ('messages_text', $params))
+        {
+            if(!empty($params['messages_text']))
+            {
+                return $params['messages_text'];
+            }
+            return null;
+        }
+        return null;
+    }
+    protected function getUserRepository(): UserRepository
+    {
+        return $this->userRepository;
     }
 }

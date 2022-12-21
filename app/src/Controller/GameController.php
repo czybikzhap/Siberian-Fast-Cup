@@ -10,7 +10,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
-class GameController extends AutorizationController
+class GameController extends WithAuthorizationController
 {
     //to do
     private UserRepository $userRepository;
@@ -29,7 +29,7 @@ class GameController extends AutorizationController
      */
     public function showGame(Request $request, Response $response)
     {
-        $user = $this->authorization($request, $this->userRepository);
+        $user = $this->authorization($request);
         if($user === null)
         {
             $response->getBody()->write("Token entered incorrectly");
@@ -40,10 +40,10 @@ class GameController extends AutorizationController
 
         try {
             $games = $this->liClient->getGames($user->getLichessname());
-        }catch (\Throwable $throwable)
+        }catch (GuzzleException $exception)
         {
-            //TODO Логирование сделать
-            $response->getBody()->write("Ошибка сервера");
+
+            $response->getBody()->write("Ошибка сервера: " . $exception->getMessage());
             return $response->withStatus(500);
         }
 
@@ -63,5 +63,10 @@ class GameController extends AutorizationController
         $response->getBody()->write("Поздравляю, партии сохранены!");
         return $response
             ->withStatus(201);
+    }
+
+    protected function getUserRepository(): UserRepository
+    {
+        return $this->userRepository;
     }
 }
